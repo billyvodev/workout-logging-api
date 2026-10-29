@@ -1,4 +1,5 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -7,7 +8,10 @@ import {
   CorrelationIdMiddleware,
   RequestLoggerMiddleware,
   getCorrelationId,
-} from './common/middleware';
+  AllExceptionsFilter,
+  ResponseTransformInterceptor,
+  CustomValidationPipe,
+} from './common';
 
 @Module({
   imports: [
@@ -48,7 +52,21 @@ import {
     PrismaModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseTransformInterceptor,
+    },
+    {
+      provide: APP_PIPE,
+      useClass: CustomValidationPipe,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
