@@ -1,0 +1,64 @@
+datasource db {
+  provider   = "postgresql"
+  extensions = [pg_trgm]
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+model ExerciseCatalog {
+  id                 String         @id @default(uuid()) @db.Uuid
+  canonicalName      String         @unique @map("canonical_name") @db.VarChar(150)
+  displayName        String         @map("display_name") @db.VarChar(150)
+  primaryMuscleGroup String         @map("primary_muscle_group") @db.VarChar(50)
+  aliases            String[]       @map("aliases")
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz
+  workoutEntries     WorkoutEntry[]
+
+  @@map("exercises_catalog")
+}
+
+model WorkoutEntry {
+  id                String           @id @default(uuid()) @db.Uuid
+  userId            String           @map("user_id") @db.VarChar(128)
+  exerciseName      String           @map("exercise_name") @db.VarChar(150)
+  exerciseNameNorm  String           @map("exercise_name_norm") @db.VarChar(150)
+  exerciseCatalogId String?          @map("exercise_catalog_id") @db.Uuid
+  muscleGroup       String?          @map("muscle_group") @db.VarChar(50)
+  performedAt       DateTime         @map("performed_at") @db.Timestamptz
+  idempotencyKey    String?          @map("idempotency_key") @db.VarChar(255)
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz
+
+  exerciseCatalog   ExerciseCatalog? @relation(fields: [exerciseCatalogId], references: [id], onDelete: SetNull)
+  sets              WorkoutSet[]
+
+  @@unique([userId, idempotencyKey], name: "uniq_entries_user_idempotency")
+  @@index([userId, performedAt(sort: Desc), id(sort: Desc)], name: "idx_entries_user_performed_id")
+  @@index([userId, muscleGroup, performedAt(sort: Desc)], name: "idx_entries_user_muscle_date")
+  @@index([exerciseNameNorm(ops: raw("gin_trgm_ops"))], type: Gin, name: "idx_entries_exercise_trgm")
+  @@map("workout_entries")
+}
+
+model WorkoutSet {
+  id               String       @id @default(uuid()) @db.Uuid
+  workoutEntryId   String       @map("workout_entry_id") @db.Uuid
+  userId           String       @map("user_id") @db.VarChar(128)
+  exerciseNameNorm String       @map("exercise_name_norm") @db.VarChar(150)
+  performedAt      DateTime     @map("performed_at") @db.Timestamptz
+  setNumber        Int          @map("set_number")
+  reps             Int          @map("reps")
+  originalWeight   Decimal      @map("original_weight") @db.Decimal(8, 2)
+  originalUnit     String       @map("original_unit") @db.VarChar(10)
+  weightKg         Decimal      @map("weight_kg") @db.Decimal(10, 4)
+  volumeKg         Decimal      @map("volume_kg") @db.Decimal(12, 4)
+  estimated1rmKg   Decimal      @map("estimated_1rm_kg") @db.Decimal(10, 4)
+
+  workoutEntry     WorkoutEntry @relation(fields: [workoutEntryId], references: [id], onDelete: Cascade)
+
+  @@index([userId, exerciseNameNorm, performedAt(sort: Desc)], name: "idx_sets_pr_lookup")
+  @@index([workoutEntryId, setNumber(sort: Asc)], name: "idx_sets_entry_fk")
+  @@map("workout_sets")
+}
