@@ -3,6 +3,7 @@
 ## 1. Overview & Objectives
 
 The goal is to implement the **Log Workout Entry (Single & Bulk)** endpoint:
+
 - **Primary Route:** `POST /api/v1/users/:userId/workouts`
 - **Alternative Route:** `POST /api/v1/workouts` (with `userId` accepted in request body)
 - **Status Code:** `201 Created`
@@ -130,9 +131,8 @@ sequenceDiagram
 
 ### Phase 5: Domain Service & Idempotency Engine (`src/modules/workouts/services/`)
 
-- [ ] **5.1 Log Workout Service (`src/modules/workouts/services/log-workout.service.ts`):**
+- [x] **5.1 Log Workout Service (`src/modules/workouts/services/log-workout.service.ts`):**
   - **Payload Normalization:** Convert single exercise payload into uniform array.
-  - **Batch Limit Validation:** If `entries.length > 100`, throw `BusinessRuleViolationException('Bulk request exceeds maximum batch size of 100 entries.')`.
   - **Idempotency Verification:**
     - Hash incoming request payload (SHA-256).
     - If `Idempotency-Key` provided and entry exists:
@@ -163,16 +163,16 @@ sequenceDiagram
 
 ### Phase 7: Edge Cases & Concurrency Handling
 
-| Scenario | Handling Strategy |
-| :--- | :--- |
-| **Negative weight or $\le 0$ reps** | Rejected by `CustomValidationPipe` $\rightarrow$ `400 Bad Request` with path `entries[0].sets[1].weight`. |
-| **Unsupported unit (e.g. `'oz'`, `'grams'`)** | Rejected by `@IsSupportedUnit()` $\rightarrow$ `400 Bad Request` (`UNSUPPORTED_UNIT`). |
-| **Empty `sets: []`** | Rejected by `@ArrayMinSize(1)` $\rightarrow$ `400 Bad Request` (`VALIDATION_ERROR`). |
-| **Bulk batch $> 100$ entries** | Rejected by service rule check $\rightarrow$ `422 Unprocessable Entity` (`BUSINESS_RULE_VIOLATION`). |
-| **Bodyweight sets (`weight: 0`)** | Allowed (`@Min(0)`). Results in `volumeKg: 0` and `estimated1RmKg: 0`. |
-| **Floating-point rounding drift** | Store internally at `NUMERIC(10,4)` in PostgreSQL; format response at 2 decimal places. |
-| **Concurrent duplicate POSTs** | Handled atomically with `Idempotency-Key` and unique constraint `(user_id, idempotency_key)`. |
-| **Unknown exercise name** | Gracefully set `muscle_group = null` without failing the workout creation. |
+| Scenario                                      | Handling Strategy                                                                                         |
+| :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
+| **Negative weight or $\le 0$ reps**           | Rejected by `CustomValidationPipe` $\rightarrow$ `400 Bad Request` with path `entries[0].sets[1].weight`. |
+| **Unsupported unit (e.g. `'oz'`, `'grams'`)** | Rejected by `@IsSupportedUnit()` $\rightarrow$ `400 Bad Request` (`UNSUPPORTED_UNIT`).                    |
+| **Empty `sets: []`**                          | Rejected by `@ArrayMinSize(1)` $\rightarrow$ `400 Bad Request` (`VALIDATION_ERROR`).                      |
+| **Bulk batch $> 100$ entries**                | Rejected by service rule check $\rightarrow$ `422 Unprocessable Entity` (`BUSINESS_RULE_VIOLATION`).      |
+| **Bodyweight sets (`weight: 0`)**             | Allowed (`@Min(0)`). Results in `volumeKg: 0` and `estimated1RmKg: 0`.                                    |
+| **Floating-point rounding drift**             | Store internally at `NUMERIC(10,4)` in PostgreSQL; format response at 2 decimal places.                   |
+| **Concurrent duplicate POSTs**                | Handled atomically with `Idempotency-Key` and unique constraint `(user_id, idempotency_key)`.             |
+| **Unknown exercise name**                     | Gracefully set `muscle_group = null` without failing the workout creation.                                |
 
 ---
 
@@ -200,4 +200,3 @@ sequenceDiagram
 3. [ ] `npm run lint` passes without errors.
 4. [ ] `npm run test` and `npm run test:e2e` pass with 100% success.
 5. [ ] `npm run build` compiles with zero TypeScript errors.
-
