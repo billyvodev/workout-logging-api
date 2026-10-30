@@ -97,20 +97,20 @@ sequenceDiagram
 
 ### Phase 3: DTOs & Strict Validation (`src/modules/workouts/dto/`)
 
-- [ ] **3.1 Set Input DTO (`src/modules/workouts/dto/log-set.dto.ts`):**
+- [x] **3.1 Set Input DTO (`src/modules/workouts/dto/log-set.dto.ts`):**
   - `@IsInt() @Min(1) @Max(1000)` `reps`
   - `@IsNumber({ maxDecimalPlaces: 2 }) @Min(0) @Max(5000)` `weight` (supports bodyweight sets at 0)
   - `@IsString() @IsSupportedUnit()` `unit`
-- [ ] **3.2 Workout Entry DTO (`src/modules/workouts/dto/log-workout-entry.dto.ts`):**
+- [x] **3.2 Workout Entry DTO (`src/modules/workouts/dto/log-workout-entry.dto.ts`):**
   - `@IsISO8601()` `date` (normalized to UTC)
   - `@IsString() @Transform(({ value }) => value?.trim()) @Length(1, 150)` `exerciseName`
   - `@IsArray() @ArrayMinSize(1) @ArrayMaxSize(100) @ValidateNested({ each: true }) @Type(() => LogSetDto)` `sets`
-- [ ] **3.3 Single & Bulk Request Body DTO (`src/modules/workouts/dto/log-workout.dto.ts`):**
+- [x] **3.3 Single & Bulk Request Body DTO (`src/modules/workouts/dto/log-workout.dto.ts`):**
   - Support both:
     1. Single payload: `{ date, exerciseName, sets }`
     2. Bulk payload: `{ entries: [...] }` (max 100 entries; throws `422 BUSINESS_RULE_VIOLATION` if $> 100$)
   - Accept optional `userId` in body when accessed via `/api/v1/workouts`.
-- [ ] **3.4 Response DTOs (`src/modules/workouts/dto/logged-workout-response.dto.ts`):**
+- [x] **3.4 Response DTOs (`src/modules/workouts/dto/logged-workout-response.dto.ts`):**
   - Match specification schema with `data: LoggedWorkoutEntryResponseDto[]` and `meta: { entriesLogged, totalSetsLogged }`.
   - Sets contain `original: { weight, unit }` and `normalized: { weightKg, volumeKg, estimated1RmKg }` rounded to 2 decimal places.
 
