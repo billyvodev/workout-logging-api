@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Prisma } from '@prisma/client';
 import {
+  BusinessRuleViolationException,
   IdempotencyConflictException,
   UnitConversionService,
   ValidationException,
@@ -238,6 +239,30 @@ describe('LogWorkoutService', () => {
         ValidationException,
       );
     });
+
+    it('should throw BusinessRuleViolationException if bulk entries exceed 100', async () => {
+      const excessiveEntries = Array.from({ length: 101 }, (_, i) => ({
+        date: '2026-10-29T10:30:00.000Z',
+        exerciseName: `Exercise ${i + 1}`,
+        sets: [{ reps: 10, weight: 50, unit: 'kg' }],
+      }));
+
+      const dto = Object.assign(new LogWorkoutDto(), {
+        entries: excessiveEntries,
+      });
+
+      await expect(service.logWorkouts('user_123', dto)).rejects.toThrow(
+        BusinessRuleViolationException,
+      );
+    });
+
+    it('should throw ValidationException if dto has no entries', async () => {
+      const emptyDto = new LogWorkoutDto();
+
+      await expect(service.logWorkouts('user_123', emptyDto)).rejects.toThrow(
+        ValidationException,
+      );
+    });
   });
 
   describe('logWorkouts - Idempotency Replay & Conflict Detection', () => {
@@ -316,6 +341,28 @@ describe('LogWorkoutService', () => {
       );
 
       expect(result.data[0].id).toBe('existing-entry-id');
+    });
+
+    it('should throw IdempotencyConflictException if race-condition P2002 occurs and payload conflicts', async () => {
+      workoutRepoMock.findByIdempotencyKey
+        .mockResolvedValueOnce([]) // First check sees no entry
+        .mockResolvedValueOnce([existingEntry]); // After P2002, existing entry found with different reps
+
+      const conflictingDto: LogWorkoutDto = Object.assign(new LogWorkoutDto(), {
+        date: '2026-10-29T10:30:00.000Z',
+        exerciseName: 'Barbell Bench Press',
+        sets: [{ reps: 99, weight: 225, unit: 'lb' }],
+      });
+
+      const p2002Error = new Prisma.PrismaClientKnownRequestError(
+        'Unique constraint violation',
+        { code: 'P2002', clientVersion: '5.0.0' },
+      );
+      workoutRepoMock.createBulkWorkoutTx.mockRejectedValue(p2002Error);
+
+      await expect(
+        service.logWorkouts('user_123', conflictingDto, 'idemp-key-1'),
+      ).rejects.toThrow(IdempotencyConflictException);
     });
   });
 });

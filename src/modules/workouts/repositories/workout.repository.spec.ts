@@ -99,6 +99,41 @@ describe('WorkoutRepository', () => {
       });
       expect(result).toEqual(mockResult);
     });
+
+    it('should sort bulk entries deterministically by index suffix if returned out of order', async () => {
+      const mockResult = [
+        {
+          id: 'entry-2',
+          userId: 'user_123',
+          idempotencyKey: 'idemp-bulk:2',
+          sets: [],
+        },
+        {
+          id: 'entry-0',
+          userId: 'user_123',
+          idempotencyKey: 'idemp-bulk:0',
+          sets: [],
+        },
+        {
+          id: 'entry-1',
+          userId: 'user_123',
+          idempotencyKey: 'idemp-bulk:1',
+          sets: [],
+        },
+      ];
+      prismaMock.workoutEntry.findMany.mockResolvedValue(mockResult);
+
+      const result = await repository.findByIdempotencyKey(
+        'user_123',
+        'idemp-bulk',
+      );
+
+      expect(result.map((r) => r.idempotencyKey)).toEqual([
+        'idemp-bulk:0',
+        'idemp-bulk:1',
+        'idemp-bulk:2',
+      ]);
+    });
   });
 
   describe('createBulkWorkoutTx', () => {

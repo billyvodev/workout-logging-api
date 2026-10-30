@@ -161,15 +161,18 @@ sequenceDiagram
 
 ### Phase 7: Edge Cases & Concurrency Handling
 
-| Scenario                                      | Handling Strategy                                                                                         |
-| :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
-| **Negative weight or $\le 0$ reps**           | Rejected by `CustomValidationPipe` $\rightarrow$ `400 Bad Request` with path `entries[0].sets[1].weight`. |
-| **Unsupported unit (e.g. `'oz'`, `'grams'`)** | Rejected by `@IsSupportedUnit()` $\rightarrow$ `400 Bad Request` (`UNSUPPORTED_UNIT`).                    |
-| **Empty `sets: []`**                          | Rejected by `@ArrayMinSize(1)` $\rightarrow$ `400 Bad Request` (`VALIDATION_ERROR`).                      |
-| **Bodyweight sets (`weight: 0`)**             | Allowed (`@Min(0)`). Results in `volumeKg: 0` and `estimated1RmKg: 0`.                                    |
-| **Floating-point rounding drift**             | Store internally at `NUMERIC(10,4)` in PostgreSQL; format response at 2 decimal places.                   |
-| **Concurrent duplicate POSTs**                | Handled atomically with `Idempotency-Key` and unique constraint `(user_id, idempotency_key)`.             |
-| **Unknown exercise name**                     | Gracefully set `muscle_group = null` without failing the workout creation.                                |
+- [x] **7.1 Input Boundary & Validation Edge Cases:**
+  - Negative weight or $\le 0$ reps rejected by `CustomValidationPipe` $\rightarrow$ `400 Bad Request` (`VALIDATION_ERROR`) with indexed path `entries[0].sets[1].weight`.
+  - Unsupported unit (e.g. `'oz'`, `'grams'`) rejected by `@IsSupportedUnit()` $\rightarrow$ `400 Bad Request` (`UNSUPPORTED_UNIT`).
+  - Empty `sets: []` rejected by `@ArrayMinSize(1)` $\rightarrow$ `400 Bad Request` (`VALIDATION_ERROR`).
+  - Bodyweight sets (`weight: 0`) allowed via `@Min(0)` $\rightarrow$ evaluates to `volumeKg: 0` and `estimated1RmKg: 0`.
+  - Bulk batch size $> 100$ entries rejected by `BusinessRuleViolationException` $\rightarrow$ `422 Unprocessable Entity` (`BUSINESS_RULE_VIOLATION`).
+  - Unknown exercise name gracefully handled setting `muscle_group = null` without failing workout creation.
+- [x] **7.2 Concurrency & Rounding Handling:**
+  - Internal metrics stored with high precision (`NUMERIC(10,4)` in PostgreSQL) to prevent rounding drift, returned formatted to 2 decimal places.
+  - Concurrent duplicate POSTs handled atomically with `Idempotency-Key` and database unique constraint `(user_id, idempotency_key)`.
+  - Prisma race condition `P2002` trapped to return cached entry on matching payload or throw `409 Conflict` (`IDEMPOTENCY_CONFLICT`) on conflicting payload.
+  - Deterministic natural sorting on bulk idempotency compound keys (`${idempotencyKey}:${i}`) prevents payload comparison false negatives.
 
 ---
 

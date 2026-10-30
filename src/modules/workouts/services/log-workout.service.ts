@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
+  BusinessRuleViolationException,
   IdempotencyConflictException,
   UnitConversionService,
   ValidationException,
@@ -58,6 +59,18 @@ export class LogWorkoutService {
           {
             field: 'entries',
             issue: 'At least one exercise entry is required.',
+          },
+        ],
+      );
+    }
+
+    if (entries.length > 100) {
+      throw new BusinessRuleViolationException(
+        'Bulk workout logging is limited to a maximum of 100 entries per request.',
+        [
+          {
+            field: 'entries',
+            issue: 'Bulk entries cannot exceed 100 items per request.',
           },
         ],
       );

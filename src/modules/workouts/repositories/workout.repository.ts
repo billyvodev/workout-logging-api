@@ -20,7 +20,7 @@ export class WorkoutRepository {
     userId: string,
     idempotencyKey: string,
   ): Promise<WorkoutEntryWithSets[]> {
-    return this.prisma.workoutEntry.findMany({
+    const entries = await this.prisma.workoutEntry.findMany({
       where: {
         userId,
         OR: [
@@ -34,6 +34,23 @@ export class WorkoutRepository {
         },
       },
       orderBy: { createdAt: 'asc' },
+    });
+
+    if (entries.length <= 1) {
+      return entries;
+    }
+
+    return entries.sort((a, b) => {
+      const aKey = a.idempotencyKey ?? '';
+      const bKey = b.idempotencyKey ?? '';
+      const prefix = `${idempotencyKey}:`;
+      const aIdx = aKey.startsWith(prefix)
+        ? parseInt(aKey.slice(prefix.length), 10)
+        : 0;
+      const bIdx = bKey.startsWith(prefix)
+        ? parseInt(bKey.slice(prefix.length), 10)
+        : 0;
+      return (isNaN(aIdx) ? 0 : aIdx) - (isNaN(bIdx) ? 0 : bIdx);
     });
   }
 
