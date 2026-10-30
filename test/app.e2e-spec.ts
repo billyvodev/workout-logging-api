@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, VersioningType } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
+import { DEFAULT_GLOBAL_PREFIX, DEFAULT_API_VERSION } from '../src/common';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
@@ -13,12 +14,17 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix(DEFAULT_GLOBAL_PREFIX);
+    app.enableVersioning({
+      type: VersioningType.URI,
+      defaultVersion: DEFAULT_API_VERSION,
+    });
     await app.init();
   });
 
-  it('/ (GET) should return Hello World and generate x-correlation-id header', async () => {
+  it('/api/v1 (GET) should return Hello World and generate x-correlation-id header', async () => {
     const response = await request(app.getHttpServer())
-      .get('/')
+      .get('/api/v1')
       .expect(200)
       .expect('Hello World!');
 
@@ -26,20 +32,20 @@ describe('AppController (e2e)', () => {
     expect(response.headers['x-correlation-id']).toMatch(/^req_[a-f0-9]{12}$/);
   });
 
-  it('/ (GET) should preserve incoming x-correlation-id header', async () => {
+  it('/api/v1 (GET) should preserve incoming x-correlation-id header', async () => {
     const customCorrelationId = 'req_custom_trace_999';
     const response = await request(app.getHttpServer())
-      .get('/')
+      .get('/api/v1')
       .set('x-correlation-id', customCorrelationId)
       .expect(200);
 
     expect(response.headers['x-correlation-id']).toBe(customCorrelationId);
   });
 
-  it('/ (GET) should fallback to x-request-id header as correlation ID', async () => {
+  it('/api/v1 (GET) should fallback to x-request-id header as correlation ID', async () => {
     const requestId = 'req_incoming_req_id';
     const response = await request(app.getHttpServer())
-      .get('/')
+      .get('/api/v1')
       .set('x-request-id', requestId)
       .expect(200);
 

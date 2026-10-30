@@ -72,6 +72,6 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer
       .apply(CorrelationIdMiddleware, RequestLoggerMiddleware)
-      .forRoutes('*');
+      .forRoutes('{*path}');
   }
 }

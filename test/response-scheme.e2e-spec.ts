@@ -6,6 +6,7 @@ import {
   Post,
   Body,
   HttpStatus,
+  VersioningType,
 } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
@@ -19,6 +20,8 @@ import {
   UnsupportedUnitException,
   IdempotencyConflictException,
   BusinessRuleViolationException,
+  DEFAULT_GLOBAL_PREFIX,
+  DEFAULT_API_VERSION,
 } from '../src/common';
 
 class TestDto {
@@ -30,7 +33,7 @@ class TestDto {
   reps!: number;
 }
 
-@Controller('api/v1/test')
+@Controller('test')
 class TestResponseController {
   @Get('success-raw')
   getSuccessRaw() {
@@ -117,6 +120,11 @@ describe('Response Scheme Handler E2E', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix(DEFAULT_GLOBAL_PREFIX);
+    app.enableVersioning({
+      type: VersioningType.URI,
+      defaultVersion: DEFAULT_API_VERSION,
+    });
     await app.init();
   });
 

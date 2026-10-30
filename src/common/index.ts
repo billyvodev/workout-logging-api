@@ -1,5 +1,6 @@
 export * from './constants';
 export * from './interfaces';
+export * from './dto';
 export * from './exceptions';
 export * from './decorators';
 export * from './filters';

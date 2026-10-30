@@ -1,0 +1,3 @@
+export const DEFAULT_GLOBAL_PREFIX = 'api';
+export const DEFAULT_API_VERSION = '1';
+export const DEFAULT_ROUTE_PREFIX = `${DEFAULT_GLOBAL_PREFIX}/v${DEFAULT_API_VERSION}`;
