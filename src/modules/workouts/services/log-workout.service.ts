@@ -41,7 +41,7 @@ export class LogWorkoutService {
     dto: LogWorkoutDto,
     idempotencyKey?: string,
   ): Promise<LoggedWorkoutResponseDto> {
-    const effectiveUserId = (userId || dto.userId)?.trim();
+    const effectiveUserId = userId?.trim();
     if (!effectiveUserId) {
       throw new ValidationException(
         'Validation failed for one or more fields.',

@@ -179,18 +179,6 @@ describe('Workout DTOs Validation', () => {
       expect(entries[1].exerciseName).toBe('Incline Dumbbell Press');
     });
 
-    it('should accept optional userId in body', async () => {
-      const dto = plainToInstance(LogWorkoutDto, {
-        userId: 'user_123',
-        date: '2026-10-29T10:30:00Z',
-        exerciseName: 'Barbell Bench Press',
-        sets: [{ reps: 8, weight: 225, unit: 'lb' }],
-      });
-      const errors = await validate(dto);
-      expect(errors).toHaveLength(0);
-      expect(dto.userId).toBe('user_123');
-    });
-
     it('should reject empty object payload', async () => {
       const dto = plainToInstance(LogWorkoutDto, {});
       const errors = await validate(dto);

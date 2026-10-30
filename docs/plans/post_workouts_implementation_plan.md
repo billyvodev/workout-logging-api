@@ -4,8 +4,7 @@
 
 The goal is to implement the **Log Workout Entry (Single & Bulk)** endpoint:
 
-- **Primary Route:** `POST /api/v1/users/:userId/workouts`
-- **Alternative Route:** `POST /api/v1/workouts` (with `userId` accepted in request body)
+- **Route:** `POST /api/v1/users/:userId/workouts`
 - **Status Code:** `201 Created`
 - **Key Responsibilities:**
   1. Validate incoming payload (single exercise or bulk array up to 100 entries, reps, weights, supported units, ISO dates).
@@ -110,7 +109,6 @@ sequenceDiagram
   - Support both:
     1. Single payload: `{ date, exerciseName, sets }`
     2. Bulk payload: `{ entries: [...] }` (max 100 entries; throws `422 BUSINESS_RULE_VIOLATION` if $> 100$)
-  - Accept optional `userId` in body when accessed via `/api/v1/workouts`.
 - [x] **3.4 Response DTOs (`src/modules/workouts/dto/logged-workout-response.dto.ts`):**
   - Match specification schema with `data: LoggedWorkoutEntryResponseDto[]` and `meta: { entriesLogged, totalSetsLogged }`.
   - Sets contain `original: { weight, unit }` and `normalized: { weightKg, volumeKg, estimated1RmKg }` rounded to 2 decimal places.
@@ -149,13 +147,13 @@ sequenceDiagram
 
 ### Phase 6: HTTP Controller & Route Registration (`src/modules/workouts/controllers/`)
 
-- [ ] **6.1 Workouts Controller (`src/modules/workouts/controllers/workouts.controller.ts`):**
-  - `@Post('users/:userId/workouts')` and `@Post('workouts')`
+- [x] **6.1 Workouts Controller (`src/modules/workouts/controllers/workouts.controller.ts`):**
+  - `@Controller('users/:userId/workouts')` with `@Post()`
   - `@HttpCode(HttpStatus.CREATED)`
-  - Parameter extraction: `@Param('userId')` with fallback to `@Body('userId')`.
+  - Parameter extraction: `@Param('userId')`.
   - Header extraction: `@Headers('idempotency-key') idempotencyKey?: string`.
   - Structured logging: log `userId`, `entriesCount`, `setsCount`, `durationMs` via `PinoLogger`.
-- [ ] **6.2 Module Wiring:**
+- [x] **6.2 Module Wiring:**
   - Create `WorkoutsModule` importing `PrismaModule` and `ExercisesModule`.
   - Register `WorkoutsModule` in `src/app.module.ts`.
 
@@ -168,7 +166,6 @@ sequenceDiagram
 | **Negative weight or $\le 0$ reps**           | Rejected by `CustomValidationPipe` $\rightarrow$ `400 Bad Request` with path `entries[0].sets[1].weight`. |
 | **Unsupported unit (e.g. `'oz'`, `'grams'`)** | Rejected by `@IsSupportedUnit()` $\rightarrow$ `400 Bad Request` (`UNSUPPORTED_UNIT`).                    |
 | **Empty `sets: []`**                          | Rejected by `@ArrayMinSize(1)` $\rightarrow$ `400 Bad Request` (`VALIDATION_ERROR`).                      |
-| **Bulk batch $> 100$ entries**                | Rejected by service rule check $\rightarrow$ `422 Unprocessable Entity` (`BUSINESS_RULE_VIOLATION`).      |
 | **Bodyweight sets (`weight: 0`)**             | Allowed (`@Min(0)`). Results in `volumeKg: 0` and `estimated1RmKg: 0`.                                    |
 | **Floating-point rounding drift**             | Store internally at `NUMERIC(10,4)` in PostgreSQL; format response at 2 decimal places.                   |
 | **Concurrent duplicate POSTs**                | Handled atomically with `Idempotency-Key` and unique constraint `(user_id, idempotency_key)`.             |
@@ -186,7 +183,6 @@ sequenceDiagram
 - [ ] **8.2 E2E & Integration Tests (`npm run test:e2e`):**
   - `POST /api/v1/users/:userId/workouts` (Single entry $\rightarrow 201$).
   - `POST /api/v1/users/:userId/workouts` (Bulk entries $\rightarrow 201$).
-  - `POST /api/v1/workouts` (Using `userId` in body $\rightarrow 201$).
   - Validation failure scenarios (`reps: 0`, `weight: -5`, `unit: "invalid"`, empty `sets: []`).
   - Idempotency replay verification (same key returns cached result; duplicate entries are not created).
   - Idempotency conflict test (same key with altered payload $\rightarrow 409$).

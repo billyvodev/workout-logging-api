@@ -76,6 +76,8 @@ describe('Swagger Documentation (e2e)', () => {
     expect(spec.info.version).toBe('1.0.0');
     expect(spec.paths).toBeDefined();
     expect(spec.paths['/api/v1']).toBeDefined();
+    expect(spec.paths['/api/v1/users/{userId}/workouts']).toBeDefined();
+    expect(spec.paths['/api/v1/users/{userId}/workouts']?.post).toBeDefined();
     expect(spec.components?.schemas).toBeDefined();
     expect(spec.components?.securitySchemes?.['Idempotency-Key']).toBeDefined();
   });

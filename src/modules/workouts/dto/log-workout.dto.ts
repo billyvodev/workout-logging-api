@@ -6,7 +6,6 @@ import {
   IsArray,
   IsDefined,
   IsISO8601,
-  IsOptional,
   IsString,
   Length,
   ValidateIf,
@@ -16,16 +15,6 @@ import { LogSetDto } from './log-set.dto';
 import { LogWorkoutEntryDto } from './log-workout-entry.dto';
 
 export class LogWorkoutDto {
-  @ApiPropertyOptional({
-    description: 'User ID (accepted in body for /api/v1/workouts)',
-    example: 'user_123',
-    maxLength: 128,
-  })
-  @IsOptional()
-  @IsString({ message: 'userId must be a string' })
-  @Length(1, 128, { message: 'userId must be between 1 and 128 characters' })
-  readonly userId?: string;
-
   @ApiPropertyOptional({
     description: 'ISO 8601 timestamp (for single exercise logging)',
     example: '2026-10-29T10:30:00Z',

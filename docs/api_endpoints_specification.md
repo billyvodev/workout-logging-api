@@ -83,8 +83,6 @@ Logs one or multiple exercise entries for a user in a single atomic transaction.
 
 * **Method & Path:** `POST /api/v1/users/:userId/workouts`
 
-* **Alternative Path Supported:** `POST /api/v1/workouts` (when `userId` is passed inside the JSON body)
-
 #### Request Headers
 
 | Header | Required | Description | 
