@@ -3,6 +3,7 @@ import {
   ValidationPipe as NestValidationPipe,
   ValidationError,
 } from '@nestjs/common';
+import { ErrorCode } from '../constants';
 import { ErrorDetail } from '../interfaces';
 import { ValidationException } from '../exceptions';
 
@@ -52,10 +53,20 @@ export class CustomValidationPipe extends NestValidationPipe {
       transform: true,
       exceptionFactory: (errors: ValidationError[]) => {
         const details = formatValidationErrors(errors);
-        return new ValidationException(
-          'Validation failed for one or more fields.',
-          details,
-        );
+        const hasOnlyUnsupportedUnit =
+          details.length > 0 &&
+          details.every((d) => d.issue.startsWith('Unsupported weight unit'));
+
+        const code = hasOnlyUnsupportedUnit
+          ? ErrorCode.UNSUPPORTED_UNIT
+          : ErrorCode.VALIDATION_ERROR;
+
+        const message =
+          hasOnlyUnsupportedUnit && details.length === 1
+            ? details[0].issue
+            : 'Validation failed for one or more fields.';
+
+        return new ValidationException(message, details, code);
       },
     });
   }

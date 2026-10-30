@@ -65,18 +65,18 @@ sequenceDiagram
 
 ### Phase 1: Unit Conversion & Mathematical Foundations (`src/common/`)
 
-- [ ] **1.1 Unit Registry (`src/common/units/unit.registry.ts`):**
+- [x] **1.1 Unit Registry (`src/common/units/unit.registry.ts`):**
   - Implement `UnitStrategy` interface (`symbol`, `toKgFactor`).
   - Define `UNIT_REGISTRY: Readonly<Record<string, UnitStrategy>>` supporting `kg` (1.0) and `lb` (0.45359237).
   - Designed for open-closed extensibility (e.g., adding `stone` in one place).
-- [ ] **1.2 Unit Conversion Service (`src/common/units/unit-conversion.service.ts`):**
+- [x] **1.2 Unit Conversion Service (`src/common/units/unit-conversion.service.ts`):**
   - `toKg(weight: number, unit: string): number`
   - `fromKg(weightKg: number, targetUnit: string): number`
   - Decimal rounding utilities preserving exact values for zero-drift returns.
-- [ ] **1.3 Epley & Volume Math Utilities (`src/common/utils/workout-math.util.ts`):**
+- [x] **1.3 Epley & Volume Math Utilities (`src/common/utils/workout-math.util.ts`):**
   - `calculateSetVolume(reps: number, weight: number): number` $\rightarrow r \times w$
   - `calculateEpley1Rm(reps: number, weight: number): number` $\rightarrow w \times (1 + r / 30)$
-- [ ] **1.4 Unit Validation Decorator (`src/common/decorators/is-supported-unit.decorator.ts`):**
+- [x] **1.4 Unit Validation Decorator (`src/common/decorators/is-supported-unit.decorator.ts`):**
   - `@IsSupportedUnit()` constraint dynamically checking `Object.keys(UNIT_REGISTRY)`.
   - Emits descriptive RFC 7807 detail message if unsupported (e.g., `"Unsupported weight unit 'oz'. Supported units are: kg, lb."`).
 

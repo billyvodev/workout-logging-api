@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { ErrorCode } from '../constants';
+import { ErrorCode, WeightUnit } from '../constants';
 import { ErrorDetail } from '../interfaces';
 
 export interface AppExceptionOptions {
@@ -38,18 +38,22 @@ export class ValidationException extends AppException {
   constructor(
     message = 'Validation failed for one or more fields.',
     details?: readonly ErrorDetail[],
+    code: string = ErrorCode.VALIDATION_ERROR,
   ) {
     super({
       message,
       statusCode: HttpStatus.BAD_REQUEST,
-      code: ErrorCode.VALIDATION_ERROR,
+      code,
       details,
     });
   }
 }
 
 export class UnsupportedUnitException extends AppException {
-  constructor(unit: string, supportedUnits: readonly string[] = ['kg', 'lb']) {
+  constructor(
+    unit: string,
+    supportedUnits: readonly string[] = [WeightUnit.KG, WeightUnit.LB],
+  ) {
     const issue = `Unsupported weight unit '${unit}'. Supported units are: ${supportedUnits.join(', ')}.`;
     super({
       message: issue,
