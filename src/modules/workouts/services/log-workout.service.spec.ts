@@ -227,6 +227,238 @@ describe('LogWorkoutService', () => {
     });
   });
 
+  describe('logWorkouts - Bulk Entries', () => {
+    const bulkDto: LogWorkoutDto = Object.assign(new LogWorkoutDto(), {
+      entries: [
+        {
+          date: '2026-10-29T10:30:00.000Z',
+          exerciseName: 'Barbell Bench Press',
+          sets: [
+            { reps: 8, weight: 225, unit: 'lb' },
+            { reps: 6, weight: 235, unit: 'lb' },
+          ],
+        },
+        {
+          date: '2026-10-29T11:00:00.000Z',
+          exerciseName: 'Back Squat',
+          sets: [{ reps: 5, weight: 140, unit: 'kg' }],
+        },
+      ],
+    });
+
+    it('should log bulk workout entries with pre-computed metrics and aggregated metadata', async () => {
+      const mockCreatedEntries = [
+        {
+          id: 'entry-uuid-1',
+          userId: 'user_123',
+          exerciseName: 'Barbell Bench Press',
+          exerciseNameNorm: 'barbell bench press',
+          exerciseCatalogId: 'cat-uuid-bench',
+          muscleGroup: 'chest',
+          performedAt: new Date('2026-10-29T10:30:00.000Z'),
+          idempotencyKey: 'bulk-key:0',
+          createdAt: new Date('2026-10-29T10:30:05.120Z'),
+          sets: [
+            {
+              id: 'set-1',
+              workoutEntryId: 'entry-uuid-1',
+              userId: 'user_123',
+              exerciseNameNorm: 'barbell bench press',
+              performedAt: new Date('2026-10-29T10:30:00.000Z'),
+              setNumber: 1,
+              reps: 8,
+              originalWeight: new Prisma.Decimal(225),
+              originalUnit: 'lb',
+              weightKg: new Prisma.Decimal(102.0583),
+              volumeKg: new Prisma.Decimal(816.4663),
+              estimated1rmKg: new Prisma.Decimal(129.2738),
+            },
+            {
+              id: 'set-2',
+              workoutEntryId: 'entry-uuid-1',
+              userId: 'user_123',
+              exerciseNameNorm: 'barbell bench press',
+              performedAt: new Date('2026-10-29T10:30:00.000Z'),
+              setNumber: 2,
+              reps: 6,
+              originalWeight: new Prisma.Decimal(235),
+              originalUnit: 'lb',
+              weightKg: new Prisma.Decimal(106.5942),
+              volumeKg: new Prisma.Decimal(639.5652),
+              estimated1rmKg: new Prisma.Decimal(127.913),
+            },
+          ],
+        },
+        {
+          id: 'entry-uuid-2',
+          userId: 'user_123',
+          exerciseName: 'Back Squat',
+          exerciseNameNorm: 'back squat',
+          exerciseCatalogId: null,
+          muscleGroup: null,
+          performedAt: new Date('2026-10-29T11:00:00.000Z'),
+          idempotencyKey: 'bulk-key:1',
+          createdAt: new Date('2026-10-29T11:00:05.120Z'),
+          sets: [
+            {
+              id: 'set-3',
+              workoutEntryId: 'entry-uuid-2',
+              userId: 'user_123',
+              exerciseNameNorm: 'back squat',
+              performedAt: new Date('2026-10-29T11:00:00.000Z'),
+              setNumber: 1,
+              reps: 5,
+              originalWeight: new Prisma.Decimal(140),
+              originalUnit: 'kg',
+              weightKg: new Prisma.Decimal(140),
+              volumeKg: new Prisma.Decimal(700),
+              estimated1rmKg: new Prisma.Decimal(163.3333),
+            },
+          ],
+        },
+      ];
+
+      workoutRepoMock.createBulkWorkoutTx.mockResolvedValue(mockCreatedEntries);
+
+      const result = await service.logWorkouts('user_123', bulkDto, 'bulk-key');
+
+      expect(workoutRepoMock.createBulkWorkoutTx).toHaveBeenCalledWith(
+        'user_123',
+        expect.arrayContaining([
+          expect.objectContaining({
+            exerciseName: 'Barbell Bench Press',
+            exerciseNameNorm: 'barbell bench press',
+          }),
+          expect.objectContaining({
+            exerciseName: 'Back Squat',
+            exerciseNameNorm: 'back squat',
+          }),
+        ]),
+        'bulk-key',
+      );
+
+      expect(result.data).toHaveLength(2);
+      expect(result.meta.entriesLogged).toBe(2);
+      expect(result.meta.totalSetsLogged).toBe(3);
+
+      expect(result.data[0].exerciseName).toBe('Barbell Bench Press');
+      expect(result.data[0].sets).toHaveLength(2);
+      expect(result.data[1].exerciseName).toBe('Back Squat');
+      expect(result.data[1].sets).toHaveLength(1);
+      expect(result.data[1].sets[0].normalized).toEqual({
+        weightKg: 140,
+        volumeKg: 700,
+        estimated1RmKg: 163.33,
+      });
+    });
+
+    it('should return cached response on idempotent bulk retry with identical payload', async () => {
+      const mockExistingEntries = [
+        {
+          id: 'entry-uuid-1',
+          userId: 'user_123',
+          exerciseName: 'Barbell Bench Press',
+          exerciseNameNorm: 'barbell bench press',
+          muscleGroup: 'chest',
+          performedAt: new Date('2026-10-29T10:30:00.000Z'),
+          idempotencyKey: 'bulk-key:0',
+          createdAt: new Date('2026-10-29T10:30:05.120Z'),
+          sets: [
+            {
+              id: 'set-1',
+              workoutEntryId: 'entry-uuid-1',
+              userId: 'user_123',
+              exerciseNameNorm: 'barbell bench press',
+              performedAt: new Date('2026-10-29T10:30:00.000Z'),
+              setNumber: 1,
+              reps: 8,
+              originalWeight: new Prisma.Decimal(225),
+              originalUnit: 'lb',
+              weightKg: new Prisma.Decimal(102.0583),
+              volumeKg: new Prisma.Decimal(816.4663),
+              estimated1rmKg: new Prisma.Decimal(129.2738),
+            },
+            {
+              id: 'set-2',
+              workoutEntryId: 'entry-uuid-1',
+              userId: 'user_123',
+              exerciseNameNorm: 'barbell bench press',
+              performedAt: new Date('2026-10-29T10:30:00.000Z'),
+              setNumber: 2,
+              reps: 6,
+              originalWeight: new Prisma.Decimal(235),
+              originalUnit: 'lb',
+              weightKg: new Prisma.Decimal(106.5942),
+              volumeKg: new Prisma.Decimal(639.5652),
+              estimated1rmKg: new Prisma.Decimal(127.913),
+            },
+          ],
+        },
+        {
+          id: 'entry-uuid-2',
+          userId: 'user_123',
+          exerciseName: 'Back Squat',
+          exerciseNameNorm: 'back squat',
+          muscleGroup: null,
+          performedAt: new Date('2026-10-29T11:00:00.000Z'),
+          idempotencyKey: 'bulk-key:1',
+          createdAt: new Date('2026-10-29T11:00:05.120Z'),
+          sets: [
+            {
+              id: 'set-3',
+              workoutEntryId: 'entry-uuid-2',
+              userId: 'user_123',
+              exerciseNameNorm: 'back squat',
+              performedAt: new Date('2026-10-29T11:00:00.000Z'),
+              setNumber: 1,
+              reps: 5,
+              originalWeight: new Prisma.Decimal(140),
+              originalUnit: 'kg',
+              weightKg: new Prisma.Decimal(140),
+              volumeKg: new Prisma.Decimal(700),
+              estimated1rmKg: new Prisma.Decimal(163.3333),
+            },
+          ],
+        },
+      ];
+
+      workoutRepoMock.findByIdempotencyKey.mockResolvedValue(
+        mockExistingEntries,
+      );
+
+      const result = await service.logWorkouts('user_123', bulkDto, 'bulk-key');
+
+      expect(workoutRepoMock.createBulkWorkoutTx).not.toHaveBeenCalled();
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0].id).toBe('entry-uuid-1');
+      expect(result.data[1].id).toBe('entry-uuid-2');
+    });
+
+    it('should throw IdempotencyConflictException (409) if bulk payload size differs', async () => {
+      const mockExistingSingleEntry = [
+        {
+          id: 'entry-uuid-1',
+          userId: 'user_123',
+          exerciseName: 'Barbell Bench Press',
+          exerciseNameNorm: 'barbell bench press',
+          muscleGroup: 'chest',
+          performedAt: new Date('2026-10-29T10:30:00.000Z'),
+          idempotencyKey: 'bulk-key:0',
+          createdAt: new Date('2026-10-29T10:30:05.120Z'),
+          sets: [],
+        },
+      ];
+
+      workoutRepoMock.findByIdempotencyKey.mockResolvedValue(
+        mockExistingSingleEntry,
+      );
+
+      await expect(
+        service.logWorkouts('user_123', bulkDto, 'bulk-key'),
+      ).rejects.toThrow(IdempotencyConflictException);
+    });
+  });
+
   describe('logWorkouts - Validation', () => {
     it('should throw ValidationException if userId is missing', async () => {
       const dto = Object.assign(new LogWorkoutDto(), {

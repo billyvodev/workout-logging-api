@@ -178,12 +178,12 @@ sequenceDiagram
 
 ### Phase 8: Testing Strategy
 
-- [ ] **8.1 Unit Tests (`npm run test`):**
+- [x] **8.1 Unit Tests (`npm run test`):**
   - `unit-conversion.service.spec.ts`: Verify `kg` $\leftrightarrow$ `lb` accuracy and rounding.
   - `workout-math.util.spec.ts`: Test Epley 1RM and volume formula calculations.
   - `exercise-metadata.service.spec.ts`: Test exact match, alias resolution, fallback keyword matching, and unknown handling.
   - `log-workout.service.spec.ts`: Test single vs. bulk payload handling, batch size capping, and mock transactions.
-- [ ] **8.2 E2E & Integration Tests (`npm run test:e2e`):**
+- [x] **8.2 E2E & Integration Tests (`npm run test:e2e`):**
   - `POST /api/v1/users/:userId/workouts` (Single entry $\rightarrow 201$).
   - `POST /api/v1/users/:userId/workouts` (Bulk entries $\rightarrow 201$).
   - Validation failure scenarios (`reps: 0`, `weight: -5`, `unit: "invalid"`, empty `sets: []`).
@@ -194,8 +194,8 @@ sequenceDiagram
 
 ## 4. Definition of Done
 
-1. [ ] Both single entry and bulk entry payloads return `201 Created` with normalized `kg` metrics and RFC-compliant metadata.
-2. [ ] All validation errors format correctly through `AllExceptionsFilter` conforming to RFC 7807.
-3. [ ] `npm run lint` passes without errors.
-4. [ ] `npm run test` and `npm run test:e2e` pass with 100% success.
-5. [ ] `npm run build` compiles with zero TypeScript errors.
+1. [x] Both single entry and bulk entry payloads return `201 Created` with normalized `kg` metrics and RFC-compliant metadata.
+2. [x] All validation errors format correctly through `AllExceptionsFilter` conforming to RFC 7807.
+3. [x] `npm run lint` passes without errors.
+4. [x] `npm run test` and `npm run test:e2e` pass with 100% success.
+5. [x] `npm run build` compiles with zero TypeScript errors.
