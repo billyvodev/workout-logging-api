@@ -118,7 +118,7 @@ sequenceDiagram
 
 ### Phase 4: Data Access & Transaction Repository (`src/modules/workouts/repositories/`)
 
-- [ ] **4.1 Workout Repository (`src/modules/workouts/repositories/workout.repository.ts`):**
+- [x] **4.1 Workout Repository (`src/modules/workouts/repositories/workout.repository.ts`):**
   - `findByIdempotencyKey(userId: string, idempotencyKey: string)`:
     - Look up existing `WorkoutEntry` records and their sets.
   - `createBulkWorkoutTx(userId: string, preparedEntries: PreparedWorkoutEntry[], idempotencyKey?: string)`:
