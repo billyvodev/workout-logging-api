@@ -1,0 +1,194 @@
+{
+  "exercises": [
+    {
+      "canonicalName": "barbell bench press",
+      "displayName": "Barbell Bench Press",
+      "primaryMuscleGroup": "chest",
+      "aliases": [
+        "bench press",
+        "flat bench press",
+        "bb bench",
+        "flat barbell bench press"
+      ]
+    },
+    {
+      "canonicalName": "incline dumbbell press",
+      "displayName": "Incline Dumbbell Press",
+      "primaryMuscleGroup": "chest",
+      "aliases": [
+        "incline db press",
+        "incline bench press",
+        "incline bench",
+        "incline dumbbell bench press"
+      ]
+    },
+    {
+      "canonicalName": "dumbbell bench press",
+      "displayName": "Dumbbell Bench Press",
+      "primaryMuscleGroup": "chest",
+      "aliases": [
+        "db bench press",
+        "flat dumbbell press",
+        "db bench"
+      ]
+    },
+    {
+      "canonicalName": "back squat",
+      "displayName": "Back Squat",
+      "primaryMuscleGroup": "legs",
+      "aliases": [
+        "squat",
+        "barbell squat",
+        "bb squat",
+        "barbell back squat",
+        "back squats"
+      ]
+    },
+    {
+      "canonicalName": "front squat",
+      "displayName": "Front Squat",
+      "primaryMuscleGroup": "legs",
+      "aliases": [
+        "barbell front squat",
+        "bb front squat"
+      ]
+    },
+    {
+      "canonicalName": "leg press",
+      "displayName": "Leg Press",
+      "primaryMuscleGroup": "legs",
+      "aliases": [
+        "sled 45° leg press",
+        "45 degree leg press",
+        "machine leg press"
+      ]
+    },
+    {
+      "canonicalName": "deadlift",
+      "displayName": "Deadlift",
+      "primaryMuscleGroup": "back",
+      "aliases": [
+        "conventional deadlift",
+        "barbell deadlift",
+        "bb deadlift"
+      ]
+    },
+    {
+      "canonicalName": "romanian deadlift",
+      "displayName": "Romanian Deadlift",
+      "primaryMuscleGroup": "legs",
+      "aliases": [
+        "rdl",
+        "barbell rdl",
+        "dumbbell rdl"
+      ]
+    },
+    {
+      "canonicalName": "barbell row",
+      "displayName": "Barbell Row",
+      "primaryMuscleGroup": "back",
+      "aliases": [
+        "bent over row",
+        "bb row",
+        "bent-over barbell row",
+        "barbell bent over row"
+      ]
+    },
+    {
+      "canonicalName": "pull up",
+      "displayName": "Pull Up",
+      "primaryMuscleGroup": "back",
+      "aliases": [
+        "pull-up",
+        "pullup",
+        "chin up",
+        "chin-up",
+        "wide grip pull up"
+      ]
+    },
+    {
+      "canonicalName": "lat pulldown",
+      "displayName": "Lat Pulldown",
+      "primaryMuscleGroup": "back",
+      "aliases": [
+        "pulldown",
+        "cable lat pulldown",
+        "cable pulldown"
+      ]
+    },
+    {
+      "canonicalName": "overhead press",
+      "displayName": "Overhead Press",
+      "primaryMuscleGroup": "shoulders",
+      "aliases": [
+        "military press",
+        "ohp",
+        "shoulder press",
+        "standing overhead press",
+        "barbell overhead press"
+      ]
+    },
+    {
+      "canonicalName": "lateral raise",
+      "displayName": "Lateral Raise",
+      "primaryMuscleGroup": "shoulders",
+      "aliases": [
+        "side lateral raise",
+        "dumbbell lateral raise",
+        "db lateral raise",
+        "side raise"
+      ]
+    },
+    {
+      "canonicalName": "bicep curl",
+      "displayName": "Bicep Curl",
+      "primaryMuscleGroup": "arms",
+      "aliases": [
+        "barbell curl",
+        "dumbbell curl",
+        "db curl",
+        "biceps curl",
+        "curls"
+      ]
+    },
+    {
+      "canonicalName": "tricep pushdown",
+      "displayName": "Tricep Pushdown",
+      "primaryMuscleGroup": "arms",
+      "aliases": [
+        "cable pushdown",
+        "triceps pushdown",
+        "tricep extension",
+        "cable tricep extension"
+      ]
+    }
+  ],
+  "keywordFallbacks": [
+    { "keyword": "bench", "muscleGroup": "chest" },
+    { "keyword": "chest", "muscleGroup": "chest" },
+    { "keyword": "fly", "muscleGroup": "chest" },
+    { "keyword": "squat", "muscleGroup": "legs" },
+    { "keyword": "leg", "muscleGroup": "legs" },
+    { "keyword": "lunge", "muscleGroup": "legs" },
+    { "keyword": "calf", "muscleGroup": "legs" },
+    { "keyword": "quad", "muscleGroup": "legs" },
+    { "keyword": "hamstring", "muscleGroup": "legs" },
+    { "keyword": "deadlift", "muscleGroup": "back" },
+    { "keyword": "row", "muscleGroup": "back" },
+    { "keyword": "pullup", "muscleGroup": "back" },
+    { "keyword": "pull-up", "muscleGroup": "back" },
+    { "keyword": "pulldown", "muscleGroup": "back" },
+    { "keyword": "lat", "muscleGroup": "back" },
+    { "keyword": "press", "muscleGroup": "shoulders" },
+    { "keyword": "shoulder", "muscleGroup": "shoulders" },
+    { "keyword": "delt", "muscleGroup": "shoulders" },
+    { "keyword": "curl", "muscleGroup": "arms" },
+    { "keyword": "bicep", "muscleGroup": "arms" },
+    { "keyword": "tricep", "muscleGroup": "arms" },
+    { "keyword": "dip", "muscleGroup": "arms" },
+    { "keyword": "abs", "muscleGroup": "core" },
+    { "keyword": "crunch", "muscleGroup": "core" },
+    { "keyword": "plank", "muscleGroup": "core" }
+  ]
+}
+

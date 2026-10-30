@@ -4,6 +4,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './modules/prisma';
+import { ExercisesModule } from './modules/exercises';
 import {
   CorrelationIdMiddleware,
   RequestLoggerMiddleware,
@@ -50,6 +51,7 @@ import {
       },
     }),
     PrismaModule,
+    ExercisesModule,
   ],
   controllers: [AppController],
   providers: [

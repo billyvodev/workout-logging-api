@@ -84,13 +84,13 @@ sequenceDiagram
 
 ### Phase 2: Exercise Catalog & Configurable Muscle Mapping (`src/modules/exercises/`)
 
-- [ ] **2.1 Configuration File (`config/exercise-mappings.json`):**
+- [x] **2.1 Configuration File (`config/exercise-mappings.json`):**
   - Define canonical exercises (`"barbell bench press"` $\rightarrow$ `"chest"`), display names, aliases (`"bench press"`, `"bb bench"`), and keyword fallbacks (`"bench"` $\rightarrow$ `"chest"`, `"squat"` $\rightarrow$ `"legs"`).
-- [ ] **2.2 Exercise Metadata Service (`src/modules/exercises/exercise-metadata.service.ts`):**
+- [x] **2.2 Exercise Metadata Service (`src/modules/exercises/exercise-metadata.service.ts`):**
   - Load `exercise-mappings.json` on initialization.
   - Implement `resolveMuscleGroup(exerciseName: string): { canonicalName?: string; displayName?: string; muscleGroup: string | null; catalogId?: string }`.
   - Normalization pipeline: `trim().toLowerCase()`, exact match, alias match, fallback keyword scan, or graceful `null` for unknown exercises (does not block workout creation).
-- [ ] **2.3 Exercises Module (`src/modules/exercises/exercises.module.ts`):**
+- [x] **2.3 Exercises Module (`src/modules/exercises/exercises.module.ts`):**
   - Export `ExerciseMetadataService` for consumption in `WorkoutsModule`.
 
 ---
