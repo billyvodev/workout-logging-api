@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.gemini
+test/benchmark/results
+coverage
+*.log
+.env
+
