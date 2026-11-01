@@ -227,17 +227,17 @@ sequenceDiagram
 
 ### Phase 6: Edge Cases & Scalability Safeguards
 
-- [ ] **6.1 Keyset Pagination at 50,000+ Records:**
+- [x] **6.1 Keyset Pagination at 50,000+ Records:**
   - Guarantees $O(\log N)$ cursor seek using composite B-Tree index `(user_id, performed_at DESC, id DESC)`.
   - Avoids expensive SQL `OFFSET` scans for high-scale paging.
-- [ ] **6.2 Corrupt Cursor Protection:**
+- [x] **6.2 Corrupt Cursor Protection:**
   - Tampered Base64 strings or non-existent fields immediately raise `400 Bad Request` with `INVALID_CURSOR`.
-- [ ] **6.3 Date Boundary Normalization:**
+- [x] **6.3 Date Boundary Normalization:**
   - Client passing `from=2026-10-01` and `to=2026-10-31` correctly captures all entries within the full month bounds (`00:00:00.000Z` to `23:59:59.999Z`).
   - Inverted ranges (`from > to`) reject with `400 VALIDATION_ERROR`.
-- [ ] **6.4 Zero-Drift Guarantee:**
+- [x] **6.4 Zero-Drift Guarantee:**
   - Sets logged in `lb` requested back in `lb` return exact `225` rather than `224.99` or `225.01`.
-- [ ] **6.5 Empty Results Contract:**
+- [x] **6.5 Empty Results Contract:**
   - Unmatched filters return `200 OK` with an empty array `data: []`—never `404 Not Found`.
 
 ---

@@ -45,7 +45,10 @@ export class WorkoutHistoryService {
       );
     }
 
-    const limit = query.limit ?? 20;
+    const limit =
+      typeof query.limit === 'number' && query.limit >= 1 && query.limit <= 100
+        ? query.limit
+        : 20;
     const targetUnit = (query.unit ?? WeightUnit.KG).trim().toLowerCase();
 
     if (!this.unitConversionService.isSupported(targetUnit)) {
@@ -56,7 +59,10 @@ export class WorkoutHistoryService {
     }
 
     const { fromDate, toDate } = this.parseDateBounds(query.from, query.to);
-    const decodedCursor = query.cursor ? decodeCursor(query.cursor) : undefined;
+    const decodedCursor =
+      query.cursor && query.cursor.trim().length > 0
+        ? decodeCursor(query.cursor)
+        : undefined;
 
     const filter: FindHistoryFilter = {
       limit,

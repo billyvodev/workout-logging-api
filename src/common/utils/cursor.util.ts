@@ -90,12 +90,20 @@ export function decodeCursor(cursor: string): DecodedCursor {
       );
     }
 
-    const { performedAt, id } = parsed;
+    const keys = Object.keys(parsed);
+    if (keys.length !== 2) {
+      throw new InvalidCursorException(
+        'Pagination cursor cannot be decoded or has been tampered with.',
+      );
+    }
+
+    const { performedAt, id } = parsed as Record<string, unknown>;
 
     if (
       typeof performedAt !== 'string' ||
       typeof id !== 'string' ||
-      id.trim().length === 0
+      id.trim().length === 0 ||
+      id.trim().length > 128
     ) {
       throw new InvalidCursorException(
         'Pagination cursor cannot be decoded or has been tampered with.',

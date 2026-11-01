@@ -173,6 +173,51 @@ describe('cursor.util', () => {
       expect(() => decodeCursor(nonStringIdBase64)).toThrow(
         InvalidCursorException,
       );
+
+      const excessiveIdBase64 = Buffer.from(
+        JSON.stringify({
+          performedAt: '2026-10-29T10:30:00.000Z',
+          id: 'a'.repeat(129),
+        }),
+      ).toString('base64');
+      expect(() => decodeCursor(excessiveIdBase64)).toThrow(
+        InvalidCursorException,
+      );
+    });
+
+    it('should throw InvalidCursorException on payload with extra fields (tampered payload)', () => {
+      const tamperedBase64 = Buffer.from(
+        JSON.stringify({
+          performedAt: '2026-10-29T10:30:00.000Z',
+          id: 'entry_1',
+          role: 'admin',
+        }),
+      ).toString('base64');
+      expect(() => decodeCursor(tamperedBase64)).toThrow(
+        InvalidCursorException,
+      );
+    });
+
+    it('should throw InvalidCursorException on out-of-range dates', () => {
+      const pastDateBase64 = Buffer.from(
+        JSON.stringify({
+          performedAt: '1800-01-01T00:00:00.000Z',
+          id: 'entry_1',
+        }),
+      ).toString('base64');
+      expect(() => decodeCursor(pastDateBase64)).toThrow(
+        InvalidCursorException,
+      );
+
+      const futureDateBase64 = Buffer.from(
+        JSON.stringify({
+          performedAt: '2200-01-01T00:00:00.000Z',
+          id: 'entry_1',
+        }),
+      ).toString('base64');
+      expect(() => decodeCursor(futureDateBase64)).toThrow(
+        InvalidCursorException,
+      );
     });
 
     it('should verify InvalidCursorException properties match RFC 7807 expectations', () => {

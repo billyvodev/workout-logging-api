@@ -307,4 +307,77 @@ describe('WorkoutHistoryService', () => {
       );
     });
   });
+
+  describe('Edge Cases: Bodyweight Sets and Empty Sets', () => {
+    it('should correctly calculate volume and 1RM for bodyweight sets (0 weight)', async () => {
+      const bodyweightEntry = {
+        id: 'entry-uuid-bw',
+        userId: 'user_123',
+        exerciseName: 'Pull-up',
+        exerciseNameNorm: 'pull-up',
+        muscleGroup: null,
+        performedAt: new Date('2026-10-29T10:30:00.000Z'),
+        sets: [
+          {
+            id: 'set-uuid-bw-1',
+            setNumber: 1,
+            reps: 15,
+            originalWeight: new Prisma.Decimal(0),
+            originalUnit: 'kg',
+            weightKg: new Prisma.Decimal(0),
+            volumeKg: new Prisma.Decimal(0),
+            estimated1rmKg: new Prisma.Decimal(0),
+          },
+        ],
+      };
+
+      workoutRepoMock.findHistory.mockResolvedValue([bodyweightEntry]);
+
+      const response = await service.getWorkoutHistory('user_123', {
+        unit: 'kg',
+      } as WorkoutHistoryQueryDto);
+
+      expect(response.data[0].muscleGroup).toBeNull();
+      const set = response.data[0].sets[0];
+      expect(set.weight).toBe(0);
+      expect(set.volume).toBe(0);
+      expect(set.estimated1RM).toBe(0);
+      expect(set.normalizedKg).toBe(0);
+    });
+
+    it('should handle entry with empty sets array gracefully', async () => {
+      const entryNoSets = {
+        id: 'entry-uuid-empty',
+        userId: 'user_123',
+        exerciseName: 'Stretching',
+        exerciseNameNorm: 'stretching',
+        muscleGroup: null,
+        performedAt: new Date('2026-10-29T10:30:00.000Z'),
+        sets: [],
+      };
+
+      workoutRepoMock.findHistory.mockResolvedValue([entryNoSets]);
+
+      const response = await service.getWorkoutHistory('user_123', {
+        unit: 'kg',
+      } as WorkoutHistoryQueryDto);
+
+      expect(response.data[0].sets).toEqual([]);
+    });
+
+    it('should ignore empty or whitespace-only cursor and proceed without cursor filter', async () => {
+      workoutRepoMock.findHistory.mockResolvedValue([]);
+
+      await service.getWorkoutHistory('user_123', {
+        cursor: '   ',
+      } as WorkoutHistoryQueryDto);
+
+      expect(workoutRepoMock.findHistory).toHaveBeenCalledWith(
+        'user_123',
+        expect.objectContaining({
+          cursor: undefined,
+        }),
+      );
+    });
+  });
 });
