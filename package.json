@@ -7,18 +7,19 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"*.ts\" \"scripts/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" \"*.ts\" --fix",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" \"*.ts\" \"scripts/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed:benchmark": "ts-node scripts/seed-benchmark.ts"
+    "seed:benchmark": "ts-node scripts/seed-benchmark.ts",
+    "verify:plans": "ts-node scripts/verify-query-plans.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
