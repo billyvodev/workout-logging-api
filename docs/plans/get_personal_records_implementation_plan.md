@@ -93,13 +93,13 @@ sequenceDiagram
 
 ### Phase 1: Custom Mutual-Dependency Validation Decorator (`src/common/decorators/`)
 
-- [ ] **1.1 Mutual Dependency Decorator (`src/common/decorators/is-defined-together-with.decorator.ts`):**
+- [x] **1.1 Mutual Dependency Decorator (`src/common/decorators/is-defined-together-with.decorator.ts`):**
   - Implement `@IsDefinedTogetherWith(relatedProperty: string, validationOptions?: ValidationOptions)`:
     - If property $A$ has a non-empty value, property $B$ must also have a non-empty value.
     - If validation fails, produce an issue message: `"${property} requires '${relatedProperty}' to also be specified."`.
-- [ ] **1.2 Export Decorator (`src/common/decorators/index.ts`):**
+- [x] **1.2 Export Decorator (`src/common/decorators/index.ts`):**
   - Export `IsDefinedTogetherWith` and `IS_DEFINED_TOGETHER_WITH` token.
-- [ ] **1.3 Unit Tests (`src/common/decorators/is-defined-together-with.decorator.spec.ts`):**
+- [x] **1.3 Unit Tests (`src/common/decorators/is-defined-together-with.decorator.spec.ts`):**
   - Verify validation passes when both properties are present.
   - Verify validation passes when both properties are omitted/undefined.
   - Verify validation fails when only one property is provided.
