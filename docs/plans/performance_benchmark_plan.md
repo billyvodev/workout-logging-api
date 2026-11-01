@@ -221,10 +221,11 @@ flowchart TD
   - `idx_sets_pr_lookup` is selected for `GET /personal-records`.
   - Zero sequential table scans occur.
 
-### Phase 3: k6 Test Scenarios Implementation
-- Write modular k6 scripts for individual endpoints and the mixed workload profile.
-- Implement keyset pagination looping (extracting `nextCursor` and chaining requests).
+### Phase 3: k6 Test Scenarios Implementation (Completed)
+- Write modular k6 scripts for individual endpoints and the mixed workload profile (`test/benchmark/scenarios/01_health_and_meta.js` to `05_mixed_workload.js`).
+- Implement keyset pagination looping (extracting `nextCursor` and chaining requests up to 50 iterations).
 - Configure strict threshold assertions (`http_req_duration: ['p(95)<50', 'p(99)<100']`).
+- Provide cross-platform runners (`run-all-benchmarks.sh`, `run-all-benchmarks.ps1`) and SLA markdown report generator (`report-generator.ts`).
 
 ### Phase 4: Benchmark Execution
 - Start containerized services: `docker compose up -d`.

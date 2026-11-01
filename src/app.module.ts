@@ -6,6 +6,8 @@ import { AppService } from './app.service';
 import { PrismaModule } from './modules/prisma';
 import { ExercisesModule } from './modules/exercises';
 import { WorkoutsModule } from './modules/workouts';
+import { HealthModule } from './modules/health';
+import { MetadataModule } from './modules/metadata';
 import {
   CorrelationIdMiddleware,
   RequestLoggerMiddleware,
@@ -54,6 +56,8 @@ import {
     PrismaModule,
     ExercisesModule,
     WorkoutsModule,
+    HealthModule,
+    MetadataModule,
   ],
   controllers: [AppController],
   providers: [

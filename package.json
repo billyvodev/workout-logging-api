@@ -19,7 +19,13 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed:benchmark": "ts-node scripts/seed-benchmark.ts",
-    "verify:plans": "ts-node scripts/verify-query-plans.ts"
+    "verify:plans": "ts-node scripts/verify-query-plans.ts",
+    "benchmark:01": "k6 run test/benchmark/scenarios/01_health_and_meta.js",
+    "benchmark:02": "k6 run test/benchmark/scenarios/02_workouts_history.js",
+    "benchmark:03": "k6 run test/benchmark/scenarios/03_personal_records.js",
+    "benchmark:04": "k6 run test/benchmark/scenarios/04_write_transactions.js",
+    "benchmark:05": "k6 run test/benchmark/scenarios/05_mixed_workload.js",
+    "benchmark:report": "ts-node test/benchmark/report-generator.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
