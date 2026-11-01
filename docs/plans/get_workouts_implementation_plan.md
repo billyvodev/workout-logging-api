@@ -169,7 +169,7 @@ sequenceDiagram
         OR: [
           { performedAt: { lt: cursor.performedAt } },
           { performedAt: cursor.performedAt, id: { lt: cursor.id } },
-        ]
+        ];
         ```
     - Apply keyset ordering: `orderBy: [ { performedAt: 'desc' }, { id: 'desc' } ]`.
     - Apply pagination limits: `take: limit + 1`.
@@ -179,7 +179,7 @@ sequenceDiagram
 
 ### Phase 4: History Domain Service & Unit Normalization (`src/modules/workouts/services/`)
 
-- [ ] **4.1 Workout History Service (`src/modules/workouts/services/workout-history.service.ts`):**
+- [x] **4.1 Workout History Service (`src/modules/workouts/services/workout-history.service.ts`):**
   - Implement `getWorkoutHistory(userId: string, query: WorkoutHistoryQueryDto): Promise<WorkoutHistoryResponseDto>`:
     - **Parameter Sanitization:**
       - Parse and validate `from` and `to` timestamps (handling date-only start/end of day expansion and `from <= to` constraint).
@@ -201,7 +201,7 @@ sequenceDiagram
         - Return `data: []`, `hasNextPage: false`, `nextCursor: null`, message: `"No workout entries found for the specified filter criteria and date range."`.
       - Else:
         - Return populated entries with message: `"Workout entries retrieved successfully."`.
-- [ ] **4.2 Service Registration (`src/modules/workouts/services/index.ts` & `workouts.module.ts`):**
+- [x] **4.2 Service Registration (`src/modules/workouts/services/index.ts` & `workouts.module.ts`):**
   - Export `WorkoutHistoryService` and register it in `WorkoutsModule` providers and exports.
 
 ---
@@ -274,4 +274,3 @@ sequenceDiagram
 5. [ ] `npm run test` passes with 100% success across all unit test suites.
 6. [ ] `npm run test:e2e` passes across all workout history integration test scenarios.
 7. [ ] `npm run build` compiles with zero TypeScript errors.
-
