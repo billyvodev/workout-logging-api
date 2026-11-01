@@ -244,7 +244,7 @@ sequenceDiagram
 
 ### Phase 7: Testing Strategy
 
-- [ ] **7.1 Unit Tests (`npm run test`):**
+- [x] **7.1 Unit Tests (`npm run test`):**
   - `cursor.util.spec.ts`: Test valid encode/decode round-trip, invalid Base64, missing fields, and bad timestamps.
   - `workout-history.service.spec.ts`:
     - Test keyset pagination (`hasNextPage = true/false`, `nextCursor` generation).
@@ -253,7 +253,7 @@ sequenceDiagram
     - Test date normalization and inverted range rejection.
     - Test empty result envelope and messaging.
   - `workouts.controller.spec.ts`: Test controller delegation, parameter extraction, and structured logger calls.
-- [ ] **7.2 Integration & E2E Tests (`npm run test:e2e`):**
+- [x] **7.2 Integration & E2E Tests (`npm run test:e2e`):**
   - `GET /api/v1/users/:userId/workouts` (default pagination and unit).
   - Keyset pagination traversal: verify page 1 `nextCursor` fetches page 2 without duplicates or skips.
   - Filter by partial `exerciseName` matching multiple exercises.
@@ -267,10 +267,10 @@ sequenceDiagram
 
 ## 4. Definition of Done
 
-1. [ ] `GET /api/v1/users/:userId/workouts` adheres strictly to the response schema and error contracts in `docs/api_endpoints_specification.md`.
-2. [ ] Keyset pagination operates efficiently at $O(\log N)$ using composite index `(user_id, performed_at DESC, id DESC)`.
-3. [ ] All validation failures return RFC 7807 compliant error envelopes (`VALIDATION_ERROR`, `UNSUPPORTED_UNIT`, `INVALID_CURSOR`).
-4. [ ] `npm run lint` passes without errors.
-5. [ ] `npm run test` passes with 100% success across all unit test suites.
-6. [ ] `npm run test:e2e` passes across all workout history integration test scenarios.
-7. [ ] `npm run build` compiles with zero TypeScript errors.
+1. [x] `GET /api/v1/users/:userId/workouts` adheres strictly to the response schema and error contracts in `docs/api_endpoints_specification.md`.
+2. [x] Keyset pagination operates efficiently at $O(\log N)$ using composite index `(user_id, performed_at DESC, id DESC)`.
+3. [x] All validation failures return RFC 7807 compliant error envelopes (`VALIDATION_ERROR`, `UNSUPPORTED_UNIT`, `INVALID_CURSOR`).
+4. [x] `npm run lint` passes without errors.
+5. [x] `npm run test` passes with 100% success across all unit test suites.
+6. [x] `npm run test:e2e` passes across all workout history integration test scenarios.
+7. [x] `npm run build` compiles with zero TypeScript errors.

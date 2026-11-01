@@ -111,7 +111,11 @@ export function decodeCursor(cursor: string): DecodedCursor {
     }
 
     const date = new Date(performedAt);
-    if (isNaN(date.getTime())) {
+    if (
+      isNaN(date.getTime()) ||
+      date.getUTCFullYear() < 1970 ||
+      date.getUTCFullYear() > 2100
+    ) {
       throw new InvalidCursorException(
         'Pagination cursor cannot be decoded or has been tampered with.',
       );
