@@ -169,4 +169,191 @@ describe('WorkoutRepository findPersonalRecords (Integration / E2E)', () => {
 
     expect(records).toEqual([]);
   });
+
+  describe('Deterministic Tie-Breaking & Scalability Safeguards', () => {
+    const tieBreakUser = `tie_break_user_${Date.now()}`;
+    const otherUser = `other_user_${Date.now()}`;
+
+    beforeAll(async () => {
+      // 1. Seed sets with identical volume (1000kg) but different weights (50kg vs 100kg)
+      // 2. Seed sets with identical 1RM (80kg) but different weights (60kg vs 75kg)
+      // 3. Seed sets with identical weight & reps but different timestamps
+      await repository.createBulkWorkoutTx(tieBreakUser, [
+        {
+          date: new Date('2026-10-01T10:00:00.000Z'),
+          exerciseName: 'Squat',
+          exerciseNameNorm: 'squat',
+          muscleGroup: 'legs',
+          sets: [
+            // Volume tie-breaker: Set 1 has 50kg x 20 -> volume = 1000kg
+            {
+              setNumber: 1,
+              reps: 20,
+              originalWeight: 50,
+              originalUnit: 'kg',
+              weightKg: 50,
+              volumeKg: 1000,
+              estimated1rmKg: 83.3333,
+            },
+            // Volume tie-breaker: Set 2 has 100kg x 10 -> volume = 1000kg, heavier weight wins!
+            {
+              setNumber: 2,
+              reps: 10,
+              originalWeight: 100,
+              originalUnit: 'kg',
+              weightKg: 100,
+              volumeKg: 1000,
+              estimated1rmKg: 133.3333,
+            },
+          ],
+        },
+        {
+          date: new Date('2026-10-02T10:00:00.000Z'),
+          exerciseName: 'Overhead Press',
+          exerciseNameNorm: 'overhead press',
+          muscleGroup: 'shoulders',
+          sets: [
+            // 1RM tie-breaker: Set 1 has 60kg x 10 -> 1RM = 60 * (1 + 10/30) = 80kg
+            {
+              setNumber: 1,
+              reps: 10,
+              originalWeight: 60,
+              originalUnit: 'kg',
+              weightKg: 60,
+              volumeKg: 600,
+              estimated1rmKg: 80,
+            },
+            // 1RM tie-breaker: Set 2 has 75kg x 2 -> 1RM = 75 * (1 + 2/30) = 80kg, heavier weight wins!
+            {
+              setNumber: 2,
+              reps: 2,
+              originalWeight: 75,
+              originalUnit: 'kg',
+              weightKg: 75,
+              volumeKg: 150,
+              estimated1rmKg: 80,
+            },
+          ],
+        },
+        {
+          // Timestamp tie-breaker: older set (Oct 03) vs newer set (Oct 05)
+          date: new Date('2026-10-03T10:00:00.000Z'),
+          exerciseName: 'Deadlift',
+          exerciseNameNorm: 'deadlift',
+          muscleGroup: 'back',
+          sets: [
+            {
+              setNumber: 1,
+              reps: 5,
+              originalWeight: 150,
+              originalUnit: 'kg',
+              weightKg: 150,
+              volumeKg: 750,
+              estimated1rmKg: 175,
+            },
+          ],
+        },
+        {
+          date: new Date('2026-10-05T10:00:00.000Z'),
+          exerciseName: 'Deadlift',
+          exerciseNameNorm: 'deadlift',
+          muscleGroup: 'back',
+          sets: [
+            {
+              setNumber: 1,
+              reps: 5,
+              originalWeight: 150,
+              originalUnit: 'kg',
+              weightKg: 150,
+              volumeKg: 750,
+              estimated1rmKg: 175,
+            },
+          ],
+        },
+      ]);
+
+      // Seed competitor/other user with massive records
+      await repository.createBulkWorkoutTx(otherUser, [
+        {
+          date: new Date('2026-10-01T10:00:00.000Z'),
+          exerciseName: 'Squat',
+          exerciseNameNorm: 'squat',
+          muscleGroup: 'legs',
+          sets: [
+            {
+              setNumber: 1,
+              reps: 10,
+              originalWeight: 300,
+              originalUnit: 'kg',
+              weightKg: 300,
+              volumeKg: 3000,
+              estimated1rmKg: 400,
+            },
+          ],
+        },
+      ]);
+    });
+
+    afterAll(async () => {
+      await prisma.workoutSet.deleteMany({
+        where: { userId: { in: [tieBreakUser, otherUser] } },
+      });
+      await prisma.workoutEntry.deleteMany({
+        where: { userId: { in: [tieBreakUser, otherUser] } },
+      });
+    });
+
+    it('should break volume ties by selecting the set with heavier actual weight (weight_kg DESC)', async () => {
+      const records = await repository.findPersonalRecords(tieBreakUser, [
+        'squat',
+      ]);
+
+      const highestVolume = records.find(
+        (r) => r.pr_type === 'highest_volume_set',
+      );
+      expect(highestVolume).toBeDefined();
+      expect(Number(highestVolume!.volume_kg)).toBe(1000);
+      // Both sets had 1000kg volume, but 100kg set should beat 50kg set
+      expect(Number(highestVolume!.weight_kg)).toBe(100);
+      expect(highestVolume!.reps).toBe(10);
+    });
+
+    it('should break estimated 1RM ties by selecting the set with heavier actual weight (weight_kg DESC)', async () => {
+      const records = await repository.findPersonalRecords(tieBreakUser, [
+        'overhead press',
+      ]);
+
+      const best1rm = records.find((r) => r.pr_type === 'best_1rm_set');
+      expect(best1rm).toBeDefined();
+      expect(Number(best1rm!.estimated_1rm_kg)).toBe(80);
+      // Both sets had 80kg estimated 1RM, but 75kg set should beat 60kg set
+      expect(Number(best1rm!.weight_kg)).toBe(75);
+      expect(best1rm!.reps).toBe(2);
+    });
+
+    it('should break identical metric and weight ties by selecting the most recent set (performed_at DESC)', async () => {
+      const records = await repository.findPersonalRecords(tieBreakUser, [
+        'deadlift',
+      ]);
+
+      const heaviest = records.find((r) => r.pr_type === 'heaviest_set');
+      expect(heaviest).toBeDefined();
+      expect(Number(heaviest!.weight_kg)).toBe(150);
+      // Oct 05 is more recent than Oct 03
+      expect(new Date(heaviest!.performed_at).toISOString()).toBe(
+        '2026-10-05T10:00:00.000Z',
+      );
+    });
+
+    it('should enforce strict user isolation without bleeding other user records', async () => {
+      const records = await repository.findPersonalRecords(tieBreakUser, [
+        'squat',
+      ]);
+
+      const heaviest = records.find((r) => r.pr_type === 'heaviest_set');
+      expect(heaviest).toBeDefined();
+      // Must be 100kg, not otherUser's 300kg!
+      expect(Number(heaviest!.weight_kg)).toBe(100);
+    });
+  });
 });

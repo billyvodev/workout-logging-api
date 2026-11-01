@@ -327,22 +327,22 @@ sequenceDiagram
 
 ### Phase 6: Edge Cases, Concurrency & Scalability Safeguards
 
-- [ ] **6.1 Single-Table Index Scan at 50,000+ Records:**
+- [x] **6.1 Single-Table Index Scan at 50,000+ Records:**
   - Zero table join overhead. The CTE queries `workout_sets` directly using pre-computed `weight_kg`, `volume_kg`, and `estimated_1rm_kg`.
   - Composite B-Tree index `(user_id, exercise_name_norm, performed_at DESC)` ensures sub-30ms query latency.
-- [ ] **6.2 Deterministic Tie-Breaking Guarantee:**
+- [x] **6.2 Deterministic Tie-Breaking Guarantee:**
   - Identical metric values are resolved deterministically:
     - Heaviest set ties broken by higher reps (`reps DESC`).
     - Volume and 1RM ties broken by heavier actual weight (`weight_kg DESC`).
     - Timestamp tie-breaker (`performed_at DESC`) and row UUID (`id DESC`) prevent unstable query output.
-- [ ] **6.3 Mutual Dependency Validation on Comparison Dates:**
+- [x] **6.3 Mutual Dependency Validation on Comparison Dates:**
   - Request with only `compareFrom` or only `compareTo` rejects with `400 Bad Request (VALIDATION_ERROR)`.
   - Inverted ranges (`compareFrom > compareTo` or `from > to`) reject with `400 Bad Request (VALIDATION_ERROR)`.
-- [ ] **6.4 Zero-Drift Return Preservation:**
+- [x] **6.4 Zero-Drift Return Preservation:**
   - A set logged in `lb` requested in `lb` returns the exact `original_weight` (e.g. `245`) without floating-point artifacts from `lb -> kg -> lb`.
-- [ ] **6.5 Lock-Free Concurrent Reads:**
+- [x] **6.5 Lock-Free Concurrent Reads:**
   - PR calculations run directly against immutable `workout_sets` records. No shared counter rows or row locks are required.
-- [ ] **6.6 Empty Results Contract:**
+- [x] **6.6 Empty Results Contract:**
   - When zero sets match the criteria, returns `200 OK` with `records: { heaviestSet: null, ... }`—never `404 Not Found`.
 
 ---

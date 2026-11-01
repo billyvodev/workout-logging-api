@@ -530,5 +530,88 @@ describe('PersonalRecordsService', () => {
         bestEstimated1RM: null,
       });
     });
+
+    it('should set improved to false and 0 deltas when performance is identical between periods', async () => {
+      exerciseMetadataMock.resolveMuscleGroup.mockReturnValue({
+        canonicalName: 'barbell bench press',
+        displayName: 'Barbell Bench Press',
+        muscleGroup: 'chest',
+      });
+
+      // Both primary and comparison return the exact same rows
+      workoutRepoMock.findPersonalRecords
+        .mockResolvedValueOnce(samplePrimaryRows)
+        .mockResolvedValueOnce(samplePrimaryRows);
+
+      const result = await service.getPersonalRecords('user_123', {
+        exerciseName: 'Barbell Bench Press',
+        unit: 'lb',
+        from: '2026-10-01T00:00:00.000Z',
+        to: '2026-10-31T23:59:59.000Z',
+        compareFrom: '2026-09-01T00:00:00.000Z',
+        compareTo: '2026-09-30T23:59:59.000Z',
+      });
+
+      const comp = result.data.comparison;
+      expect(comp?.heaviestSet).toEqual({
+        absoluteDiff: 0,
+        percentageDiff: 0,
+        improved: false,
+      });
+      expect(comp?.highestVolumeSet).toEqual({
+        absoluteDiff: 0,
+        percentageDiff: 0,
+        improved: false,
+      });
+      expect(comp?.bestEstimated1RM).toEqual({
+        absoluteDiff: 0,
+        percentageDiff: 0,
+        improved: false,
+      });
+    });
+
+    it('should safely calculate comparison percentage when comparison baseline is 0', async () => {
+      exerciseMetadataMock.resolveMuscleGroup.mockReturnValue({
+        canonicalName: 'barbell bench press',
+        displayName: 'Barbell Bench Press',
+        muscleGroup: 'chest',
+      });
+
+      const zeroWeightRows: RawPersonalRecordRow[] = [
+        {
+          pr_type: 'heaviest_set',
+          id: 'set-zero-1',
+          workout_entry_id: 'entry-zero-1',
+          reps: 10,
+          original_weight: new Prisma.Decimal(0),
+          original_unit: 'lb',
+          weight_kg: new Prisma.Decimal(0),
+          volume_kg: new Prisma.Decimal(0),
+          estimated_1rm_kg: new Prisma.Decimal(0),
+          performed_at: new Date('2026-09-10T11:00:00.000Z'),
+        },
+      ];
+
+      workoutRepoMock.findPersonalRecords
+        .mockResolvedValueOnce(samplePrimaryRows)
+        .mockResolvedValueOnce(zeroWeightRows);
+
+      const result = await service.getPersonalRecords('user_123', {
+        exerciseName: 'Barbell Bench Press',
+        unit: 'lb',
+        from: '2026-10-01T00:00:00.000Z',
+        to: '2026-10-31T23:59:59.000Z',
+        compareFrom: '2026-09-01T00:00:00.000Z',
+        compareTo: '2026-09-30T23:59:59.000Z',
+      });
+
+      const comp = result.data.comparison;
+      // compVal = 0 -> percentageDiff safely defaults to 0 to prevent NaN / division by zero
+      expect(comp?.heaviestSet).toEqual({
+        absoluteDiff: 245,
+        percentageDiff: 0,
+        improved: true,
+      });
+    });
   });
 });
