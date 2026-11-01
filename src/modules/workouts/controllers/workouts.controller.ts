@@ -1,12 +1,14 @@
 import {
   Body,
   Controller,
+  Get,
   Headers,
   HttpCode,
   HttpStatus,
   Logger,
   Param,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiHeader,
@@ -16,15 +18,23 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ErrorResponseDto } from '../../../common';
-import { LogWorkoutDto, LoggedWorkoutResponseDto } from '../dto';
-import { LogWorkoutService } from '../services';
+import {
+  LogWorkoutDto,
+  LoggedWorkoutResponseDto,
+  WorkoutHistoryQueryDto,
+  WorkoutHistoryResponseDto,
+} from '../dto';
+import { LogWorkoutService, WorkoutHistoryService } from '../services';
 
 @ApiTags('Workouts')
 @Controller('users/:userId/workouts')
 export class WorkoutsController {
   private readonly logger = new Logger(WorkoutsController.name);
 
-  constructor(private readonly logWorkoutService: LogWorkoutService) {}
+  constructor(
+    private readonly logWorkoutService: LogWorkoutService,
+    private readonly workoutHistoryService: WorkoutHistoryService,
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -85,6 +95,61 @@ export class WorkoutsController {
       userId: effectiveUserId,
       entriesCount: result.meta.entriesLogged,
       setsCount: result.meta.totalSetsLogged,
+      durationMs,
+    });
+
+    return result;
+  }
+
+  @Get()
+  @ApiOperation({
+    summary: 'Get paginated workout history for a user',
+    description:
+      'Retrieves a paginated list of workout entries for a user with keyset cursor navigation, case-insensitive partial exercise matching, and dynamic unit conversion.',
+  })
+  @ApiParam({
+    name: 'userId',
+    required: true,
+    description: 'Unique identifier of the user',
+    example: 'user_123',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Workout history retrieved successfully.',
+    type: WorkoutHistoryResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description:
+      'Validation failed for query parameters, unsupported unit, inverted dates, or corrupt cursor.',
+    type: ErrorResponseDto,
+  })
+  async getWorkoutHistory(
+    @Param('userId') userId: string,
+    @Query() query: WorkoutHistoryQueryDto,
+  ): Promise<WorkoutHistoryResponseDto> {
+    const startTime = Date.now();
+    const effectiveUserId = userId?.trim();
+
+    const result = await this.workoutHistoryService.getWorkoutHistory(
+      effectiveUserId,
+      query,
+    );
+
+    const durationMs = Date.now() - startTime;
+    this.logger.log({
+      msg: 'Workout history retrieved successfully',
+      userId: effectiveUserId,
+      filters: {
+        exerciseName: query.exerciseName,
+        from: query.from,
+        to: query.to,
+        muscleGroup: query.muscleGroup,
+        unit: query.unit,
+        limit: query.limit,
+      },
+      returnedCount: result.data.length,
+      hasNextPage: result.pagination.hasNextPage,
       durationMs,
     });
 

@@ -208,7 +208,7 @@ sequenceDiagram
 
 ### Phase 5: HTTP Controller & Route Registration (`src/modules/workouts/controllers/`)
 
-- [ ] **5.1 Controller Method (`src/modules/workouts/controllers/workouts.controller.ts`):**
+- [x] **5.1 Controller Method (`src/modules/workouts/controllers/workouts.controller.ts`):**
   - Add `@Get()` handler to `WorkoutsController`:
     ```typescript
     @Get()

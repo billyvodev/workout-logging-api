@@ -201,4 +201,3 @@ export class WorkoutHistoryService {
     return { fromDate, toDate };
   }
 }
-
