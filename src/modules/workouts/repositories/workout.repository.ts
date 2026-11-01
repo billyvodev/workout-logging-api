@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma';
 import {
+  FindHistoryFilter,
   PreparedWorkoutEntry,
   WorkoutEntryWithSets,
 } from './interfaces/workout-repository.interface';
@@ -123,6 +124,64 @@ export class WorkoutRepository {
   async findById(id: string): Promise<WorkoutEntryWithSets | null> {
     return this.prisma.workoutEntry.findUnique({
       where: { id },
+      include: {
+        sets: {
+          orderBy: { setNumber: 'asc' },
+        },
+      },
+    });
+  }
+
+  /**
+   * Retrieves a paginated history of workout entries for a user using keyset cursor pagination.
+   * Leverages composite index (user_id, performed_at DESC, id DESC) and trigram index on exercise_name_norm.
+   */
+  async findHistory(
+    userId: string,
+    filter: FindHistoryFilter,
+  ): Promise<WorkoutEntryWithSets[]> {
+    const where: Prisma.WorkoutEntryWhereInput = {
+      userId,
+      ...(filter.fromDate || filter.toDate
+        ? {
+            performedAt: {
+              ...(filter.fromDate ? { gte: filter.fromDate } : {}),
+              ...(filter.toDate ? { lte: filter.toDate } : {}),
+            },
+          }
+        : {}),
+      ...(filter.exerciseName && filter.exerciseName.trim().length > 0
+        ? {
+            exerciseNameNorm: {
+              contains: filter.exerciseName.trim().toLowerCase(),
+            },
+          }
+        : {}),
+      ...(filter.muscleGroup && filter.muscleGroup.trim().length > 0
+        ? {
+            muscleGroup: {
+              equals: filter.muscleGroup.trim().toLowerCase(),
+              mode: 'insensitive',
+            },
+          }
+        : {}),
+      ...(filter.cursor
+        ? {
+            OR: [
+              { performedAt: { lt: filter.cursor.performedAt } },
+              {
+                performedAt: filter.cursor.performedAt,
+                id: { lt: filter.cursor.id },
+              },
+            ],
+          }
+        : {}),
+    };
+
+    return this.prisma.workoutEntry.findMany({
+      where,
+      orderBy: [{ performedAt: 'desc' }, { id: 'desc' }],
+      take: filter.limit + 1,
       include: {
         sets: {
           orderBy: { setNumber: 'asc' },

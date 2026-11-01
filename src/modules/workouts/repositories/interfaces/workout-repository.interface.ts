@@ -22,3 +22,12 @@ export interface PreparedWorkoutEntry {
 export type WorkoutEntryWithSets = Prisma.WorkoutEntryGetPayload<{
   include: { sets: true };
 }>;
+
+export interface FindHistoryFilter {
+  readonly exerciseName?: string;
+  readonly fromDate?: Date;
+  readonly toDate?: Date;
+  readonly muscleGroup?: string;
+  readonly limit: number;
+  readonly cursor?: { readonly performedAt: Date; readonly id: string };
+}

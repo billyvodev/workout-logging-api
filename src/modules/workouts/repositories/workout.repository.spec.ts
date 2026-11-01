@@ -280,4 +280,209 @@ describe('WorkoutRepository', () => {
       expect(result).toEqual(mockEntry);
     });
   });
+
+  describe('findHistory', () => {
+    it('should query entries with default options and take limit + 1', async () => {
+      const mockEntries = [{ id: 'entry-1', userId: 'user_123', sets: [] }];
+      prismaMock.workoutEntry.findMany.mockResolvedValue(mockEntries);
+
+      const result = await repository.findHistory('user_123', { limit: 20 });
+
+      expect(prismaMock.workoutEntry.findMany).toHaveBeenCalledWith({
+        where: {
+          userId: 'user_123',
+        },
+        orderBy: [{ performedAt: 'desc' }, { id: 'desc' }],
+        take: 21,
+        include: {
+          sets: {
+            orderBy: { setNumber: 'asc' },
+          },
+        },
+      });
+      expect(result).toEqual(mockEntries);
+    });
+
+    it('should apply partial exerciseName match with trimmed lowercase normalization', async () => {
+      prismaMock.workoutEntry.findMany.mockResolvedValue([]);
+
+      await repository.findHistory('user_123', {
+        limit: 10,
+        exerciseName: '  Bench Press  ',
+      });
+
+      expect(prismaMock.workoutEntry.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            userId: 'user_123',
+            exerciseNameNorm: {
+              contains: 'bench press',
+            },
+          },
+        }),
+      );
+    });
+
+    it('should apply date range filters with both fromDate and toDate', async () => {
+      const fromDate = new Date('2026-10-01T00:00:00.000Z');
+      const toDate = new Date('2026-10-31T23:59:59.999Z');
+      prismaMock.workoutEntry.findMany.mockResolvedValue([]);
+
+      await repository.findHistory('user_123', {
+        limit: 20,
+        fromDate,
+        toDate,
+      });
+
+      expect(prismaMock.workoutEntry.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            userId: 'user_123',
+            performedAt: {
+              gte: fromDate,
+              lte: toDate,
+            },
+          },
+        }),
+      );
+    });
+
+    it('should apply single-sided date filters', async () => {
+      const fromDate = new Date('2026-10-01T00:00:00.000Z');
+      prismaMock.workoutEntry.findMany.mockResolvedValue([]);
+
+      await repository.findHistory('user_123', {
+        limit: 20,
+        fromDate,
+      });
+
+      expect(prismaMock.workoutEntry.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            userId: 'user_123',
+            performedAt: {
+              gte: fromDate,
+            },
+          },
+        }),
+      );
+
+      const toDate = new Date('2026-10-31T23:59:59.999Z');
+      await repository.findHistory('user_123', {
+        limit: 20,
+        toDate,
+      });
+
+      expect(prismaMock.workoutEntry.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            userId: 'user_123',
+            performedAt: {
+              lte: toDate,
+            },
+          },
+        }),
+      );
+    });
+
+    it('should apply muscleGroup filter with trimmed lowercase and case-insensitive mode', async () => {
+      prismaMock.workoutEntry.findMany.mockResolvedValue([]);
+
+      await repository.findHistory('user_123', {
+        limit: 10,
+        muscleGroup: '  CHEST  ',
+      });
+
+      expect(prismaMock.workoutEntry.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            userId: 'user_123',
+            muscleGroup: {
+              equals: 'chest',
+              mode: 'insensitive',
+            },
+          },
+        }),
+      );
+    });
+
+    it('should apply keyset cursor conditions (performedAt, id)', async () => {
+      const cursorDate = new Date('2026-10-25T14:00:00.000Z');
+      const cursorId = 'entry-uuid-cursor';
+      prismaMock.workoutEntry.findMany.mockResolvedValue([]);
+
+      await repository.findHistory('user_123', {
+        limit: 15,
+        cursor: {
+          performedAt: cursorDate,
+          id: cursorId,
+        },
+      });
+
+      expect(prismaMock.workoutEntry.findMany).toHaveBeenCalledWith({
+        where: {
+          userId: 'user_123',
+          OR: [
+            { performedAt: { lt: cursorDate } },
+            { performedAt: cursorDate, id: { lt: cursorId } },
+          ],
+        },
+        orderBy: [{ performedAt: 'desc' }, { id: 'desc' }],
+        take: 16,
+        include: {
+          sets: {
+            orderBy: { setNumber: 'asc' },
+          },
+        },
+      });
+    });
+
+    it('should combine all filters simultaneously', async () => {
+      const fromDate = new Date('2026-10-01T00:00:00.000Z');
+      const toDate = new Date('2026-10-31T23:59:59.999Z');
+      const cursorDate = new Date('2026-10-20T10:00:00.000Z');
+      const cursorId = 'entry-uuid-combo';
+      prismaMock.workoutEntry.findMany.mockResolvedValue([]);
+
+      await repository.findHistory('user_123', {
+        limit: 25,
+        exerciseName: 'Squat',
+        fromDate,
+        toDate,
+        muscleGroup: 'legs',
+        cursor: {
+          performedAt: cursorDate,
+          id: cursorId,
+        },
+      });
+
+      expect(prismaMock.workoutEntry.findMany).toHaveBeenCalledWith({
+        where: {
+          userId: 'user_123',
+          performedAt: {
+            gte: fromDate,
+            lte: toDate,
+          },
+          exerciseNameNorm: {
+            contains: 'squat',
+          },
+          muscleGroup: {
+            equals: 'legs',
+            mode: 'insensitive',
+          },
+          OR: [
+            { performedAt: { lt: cursorDate } },
+            { performedAt: cursorDate, id: { lt: cursorId } },
+          ],
+        },
+        orderBy: [{ performedAt: 'desc' }, { id: 'desc' }],
+        take: 26,
+        include: {
+          sets: {
+            orderBy: { setNumber: 'asc' },
+          },
+        },
+      });
+    });
+  });
 });

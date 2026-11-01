@@ -145,7 +145,7 @@ sequenceDiagram
 
 ### Phase 3: Data Access & Keyset Query Optimization (`src/modules/workouts/repositories/`)
 
-- [ ] **3.1 Repository Interfaces (`src/modules/workouts/repositories/interfaces/workout-repository.interface.ts`):**
+- [x] **3.1 Repository Interfaces (`src/modules/workouts/repositories/interfaces/workout-repository.interface.ts`):**
   - Define `FindHistoryFilter`:
     ```typescript
     export interface FindHistoryFilter {
@@ -157,7 +157,7 @@ sequenceDiagram
       readonly cursor?: { readonly performedAt: Date; readonly id: string };
     }
     ```
-- [ ] **3.2 Keyset Query Implementation (`src/modules/workouts/repositories/workout.repository.ts`):**
+- [x] **3.2 Keyset Query Implementation (`src/modules/workouts/repositories/workout.repository.ts`):**
   - Implement `findHistory(userId: string, filter: FindHistoryFilter): Promise<WorkoutEntryWithSets[]>`:
     - Build `where` clause:
       - `userId`
