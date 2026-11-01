@@ -349,7 +349,7 @@ sequenceDiagram
 
 ### Phase 7: Testing Strategy
 
-- [ ] **7.1 Unit Tests (`npm run test`):**
+- [x] **7.1 Unit Tests (`npm run test`):**
   - `is-defined-together-with.decorator.spec.ts`: Test presence of paired fields, single missing field rejection, and both omitted passing.
   - `personal-records-query.dto.spec.ts`:
     - Test valid DTO with all-time, single period, and comparison period.
@@ -365,7 +365,7 @@ sequenceDiagram
     - Test empty period responses (`records: null`, informative message).
     - Test alias and canonical name resolution via `ExerciseMetadataService`.
   - `personal-records.controller.spec.ts`: Test controller delegation, parameter passing, and structured logger output.
-- [ ] **7.2 Integration & E2E Tests (`npm run test:e2e`):**
+- [x] **7.2 Integration & E2E Tests (`npm run test:e2e`):**
   - `GET /api/v1/users/:userId/personal-records` with All-Time PRs.
   - Time-bounded PRs (`from` & `to`).
   - Time-range comparison (`compareFrom` & `compareTo`) verifying positive/negative percentage deltas and improvement flags.
@@ -383,13 +383,13 @@ sequenceDiagram
 
 ## 4. Definition of Done
 
-1. [ ] `GET /api/v1/users/:userId/personal-records` satisfies all functional requirements and response contracts in `docs/api_endpoints_specification.md` (Section 3.3).
-2. [ ] Parameterized SQL CTE executes single-table index scans over `workout_sets` matching Section 6.3 of `docs/architecture.md`.
-3. [ ] Deterministic tie-breaking rules and zero-drift unit preservation are strictly enforced.
-4. [ ] Mutual dependency between `compareFrom` and `compareTo` is strictly enforced at the DTO boundary.
-5. [ ] All validation failures return standardized RFC 7807 error envelopes (`VALIDATION_ERROR`, `UNSUPPORTED_UNIT`).
-6. [ ] `npm run lint` passes with 0 errors.
-7. [ ] `npm run test` passes with 100% success across all unit tests.
-8. [ ] `npm run test:e2e` passes across all Personal Records integration test scenarios.
-9. [ ] `npm run build` compiles with zero TypeScript errors.
+1. [x] `GET /api/v1/users/:userId/personal-records` satisfies all functional requirements and response contracts in `docs/api_endpoints_specification.md` (Section 3.3).
+2. [x] Parameterized SQL CTE executes single-table index scans over `workout_sets` matching Section 6.3 of `docs/architecture.md`.
+3. [x] Deterministic tie-breaking rules and zero-drift unit preservation are strictly enforced.
+4. [x] Mutual dependency between `compareFrom` and `compareTo` is strictly enforced at the DTO boundary.
+5. [x] All validation failures return standardized RFC 7807 error envelopes (`VALIDATION_ERROR`, `UNSUPPORTED_UNIT`).
+6. [x] `npm run lint` passes with 0 errors.
+7. [x] `npm run test` passes with 100% success across all unit tests.
+8. [x] `npm run test:e2e` passes across all Personal Records integration test scenarios.
+9. [x] `npm run build` compiles with zero TypeScript errors.
 
