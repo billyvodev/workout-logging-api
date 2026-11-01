@@ -9,6 +9,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-everfit_workout}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
+    command: postgres -c shared_buffers=256MB -c work_mem=16MB -c max_connections=150
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

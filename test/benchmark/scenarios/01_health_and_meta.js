@@ -9,6 +9,7 @@ const metaTrend = new Trend('metadata_duration', true);
 const errorRate = new Rate('health_meta_error_rate');
 
 export const options = {
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   stages: [
     { duration: '5s', target: 50 },    // Fast ramp-up
     { duration: '15s', target: 200 },  // 200 VUs burst

@@ -12,6 +12,7 @@ const cursorStepsCount = new Counter('history_cursor_steps_total');
 const historyErrorRate = new Rate('history_error_rate');
 
 export const options = {
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   stages: [
     { duration: '30s', target: 20 },
     { duration: '60s', target: 50 },

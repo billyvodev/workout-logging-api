@@ -24,6 +24,7 @@ const opsCounter = new Counter('mixed_operations_total');
 const mixedErrorRate = new Rate('mixed_error_rate');
 
 export const options = {
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   stages: [
     { duration: '30s', target: 20 },   // Warm-up: 20 VUs
     { duration: '3m', target: 100 },   // Steady State: 100 VUs

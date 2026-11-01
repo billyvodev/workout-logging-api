@@ -17,6 +17,7 @@ const replayTrend = new Trend('write_replay_duration', true);
 const writeErrorRate = new Rate('write_error_rate');
 
 export const options = {
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   stages: [
     { duration: '20s', target: 10 },
     { duration: '60s', target: 30 },

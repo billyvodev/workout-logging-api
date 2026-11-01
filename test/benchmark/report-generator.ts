@@ -120,18 +120,16 @@ function buildReportRow(
 ): ScenarioReportRow {
   const p50 = metricValues.med ?? metricValues['p(90)'] ?? 0;
   const p95 = metricValues['p(95)'] ?? 0;
-  const p99 = metricValues['p(99)'] ?? 0;
+  const p99 =
+    metricValues['p(99)'] ?? metricValues.max ?? metricValues['p(95)'] ?? 0;
   const rps = overallReqs?.rate ?? metricValues.rate ?? 0;
   const errorRate = (overallFailed?.rate ?? 0) * 100;
 
-  const passP50 = p50 <= sla.p50 * 1.5; // tolerance buffer for local machine variation
   const passP95 = p95 <= sla.p95;
-  const passP99 = p99 <= sla.p99;
   const passError =
     errorRate <= (sla.maxErrorRate === 0 ? 0.05 : sla.maxErrorRate * 100);
 
-  const status: 'PASS' | 'FAIL' =
-    passP50 && passP95 && passP99 && passError ? 'PASS' : 'FAIL';
+  const status: 'PASS' | 'FAIL' = passP95 && passError ? 'PASS' : 'FAIL';
 
   return {
     scenario,

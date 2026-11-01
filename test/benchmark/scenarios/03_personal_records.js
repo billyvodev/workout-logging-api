@@ -10,6 +10,7 @@ const emptyTrend = new Trend('pr_empty_duration', true);
 const prErrorRate = new Rate('pr_error_rate');
 
 export const options = {
+  summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
   stages: [
     { duration: '30s', target: 20 },
     { duration: '60s', target: 50 },
