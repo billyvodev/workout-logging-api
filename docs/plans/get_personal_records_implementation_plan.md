@@ -253,7 +253,7 @@ sequenceDiagram
 
 ### Phase 4: Personal Records Domain Service (`src/modules/workouts/services/`)
 
-- [ ] **4.1 Personal Records Service (`src/modules/workouts/services/personal-records.service.ts`):**
+- [x] **4.1 Personal Records Service (`src/modules/workouts/services/personal-records.service.ts`):**
   - Implement `getPersonalRecords(userId: string, query: PersonalRecordsQueryDto): Promise<PersonalRecordsResponseDto>`:
     - **Step 1: Input & Unit Validation:**
       - Trim `userId`, throw `ValidationException` if missing.
@@ -293,7 +293,7 @@ sequenceDiagram
         - Set message: `"No workout sets found for '${displayName}' in the specified date range."`.
       - Else:
         - Set message: `"Personal records calculated successfully."`.
-- [ ] **4.2 Service Registration (`src/modules/workouts/services/index.ts` & `workouts.module.ts`):**
+- [x] **4.2 Service Registration (`src/modules/workouts/services/index.ts` & `workouts.module.ts`):**
   - Export `PersonalRecordsService` and register it in `WorkoutsModule` providers and exports.
 
 ---

@@ -4,12 +4,26 @@ import { ExercisesModule } from '../exercises';
 import { PrismaModule } from '../prisma';
 import { WorkoutsController } from './controllers';
 import { WorkoutRepository } from './repositories';
-import { LogWorkoutService, WorkoutHistoryService } from './services';
+import {
+  LogWorkoutService,
+  PersonalRecordsService,
+  WorkoutHistoryService,
+} from './services';
 
 @Module({
   imports: [PrismaModule, ExercisesModule, UnitsModule],
   controllers: [WorkoutsController],
-  providers: [WorkoutRepository, LogWorkoutService, WorkoutHistoryService],
-  exports: [WorkoutRepository, LogWorkoutService, WorkoutHistoryService],
+  providers: [
+    WorkoutRepository,
+    LogWorkoutService,
+    WorkoutHistoryService,
+    PersonalRecordsService,
+  ],
+  exports: [
+    WorkoutRepository,
+    LogWorkoutService,
+    WorkoutHistoryService,
+    PersonalRecordsService,
+  ],
 })
 export class WorkoutsModule {}
