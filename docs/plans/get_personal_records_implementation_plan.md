@@ -108,7 +108,7 @@ sequenceDiagram
 
 ### Phase 2: DTOs & Response Contracts (`src/modules/workouts/dto/`)
 
-- [ ] **2.1 Personal Records Query DTO (`src/modules/workouts/dto/personal-records-query.dto.ts`):**
+- [x] **2.1 Personal Records Query DTO (`src/modules/workouts/dto/personal-records-query.dto.ts`):**
   - `exerciseName: string`:
     - Required trimmed string (`@IsNotEmpty()`, `@IsString()`, `@Length(1, 150)`).
   - `unit?: string`:
@@ -125,7 +125,7 @@ sequenceDiagram
   - `compareTo?: string`:
     - Optional ISO 8601 string normalized via `normalizeToDate`.
     - Paired with `@IsDefinedTogetherWith('compareFrom', { message: "'compareTo' requires 'compareFrom' to also be specified." })`.
-- [ ] **2.2 Personal Records Response DTOs (`src/modules/workouts/dto/personal-records-response.dto.ts`):**
+- [x] **2.2 Personal Records Response DTOs (`src/modules/workouts/dto/personal-records-response.dto.ts`):**
   - `HeaviestSetRecordDto`:
     - `weight: number` (display weight in target unit, 2 decimals)
     - `reps: number`
@@ -180,7 +180,7 @@ sequenceDiagram
   - `PersonalRecordsResponseDto`:
     - `data: PersonalRecordsDataDto`
     - `meta: PersonalRecordsMetaDto`
-- [ ] **2.3 Export DTOs (`src/modules/workouts/dto/index.ts`):**
+- [x] **2.3 Export DTOs (`src/modules/workouts/dto/index.ts`):**
   - Export new query and response DTOs.
 
 ---
