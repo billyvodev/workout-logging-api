@@ -4,6 +4,7 @@ import { PrismaService } from '../../prisma';
 import {
   FindHistoryFilter,
   PreparedWorkoutEntry,
+  RawPersonalRecordRow,
   WorkoutEntryWithSets,
 } from './interfaces/workout-repository.interface';
 
@@ -188,5 +189,64 @@ export class WorkoutRepository {
         },
       },
     });
+  }
+
+  /**
+   * Retrieves Personal Records (heaviest set, highest volume, best estimated 1RM)
+   * for a user across one or more exercise canonical names/aliases and optional date boundaries.
+   * Executes a single-pass parameterized SQL CTE query with deterministic tie-breaking.
+   */
+  async findPersonalRecords(
+    userId: string,
+    exerciseNames: string[],
+    fromDate?: Date,
+    toDate?: Date,
+  ): Promise<RawPersonalRecordRow[]> {
+    if (!exerciseNames || exerciseNames.length === 0) {
+      return [];
+    }
+
+    const fromIso = fromDate ? fromDate.toISOString() : null;
+    const toIso = toDate ? toDate.toISOString() : null;
+
+    return this.prisma.$queryRaw<RawPersonalRecordRow[]>`
+      WITH scoped_sets AS (
+        SELECT 
+          id, 
+          workout_entry_id, 
+          reps, 
+          original_weight, 
+          original_unit, 
+          weight_kg, 
+          volume_kg, 
+          estimated_1rm_kg, 
+          performed_at
+        FROM workout_sets
+        WHERE user_id = ${userId}
+          AND exercise_name_norm = ANY(${exerciseNames}::text[])
+          AND (${fromIso}::timestamptz IS NULL OR performed_at >= ${fromIso}::timestamptz)
+          AND (${toIso}::timestamptz IS NULL OR performed_at <= ${toIso}::timestamptz)
+      )
+      (
+        SELECT 'heaviest_set' AS pr_type, id, workout_entry_id, reps, original_weight, original_unit, weight_kg, volume_kg, estimated_1rm_kg, performed_at
+        FROM scoped_sets
+        ORDER BY weight_kg DESC, reps DESC, performed_at DESC, id DESC
+        LIMIT 1
+      )
+      UNION ALL
+      (
+        SELECT 'highest_volume_set' AS pr_type, id, workout_entry_id, reps, original_weight, original_unit, weight_kg, volume_kg, estimated_1rm_kg, performed_at
+        FROM scoped_sets
+        ORDER BY volume_kg DESC, weight_kg DESC, performed_at DESC, id DESC
+        LIMIT 1
+      )
+      UNION ALL
+      (
+        SELECT 'best_1rm_set' AS pr_type, id, workout_entry_id, reps, original_weight, original_unit, weight_kg, volume_kg, estimated_1rm_kg, performed_at
+        FROM scoped_sets
+        ORDER BY estimated_1rm_kg DESC, weight_kg DESC, performed_at DESC, id DESC
+        LIMIT 1
+      );
+    `;
   }
 }

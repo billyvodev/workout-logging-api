@@ -31,3 +31,18 @@ export interface FindHistoryFilter {
   readonly limit: number;
   readonly cursor?: { readonly performedAt: Date; readonly id: string };
 }
+
+export type PrType = 'heaviest_set' | 'highest_volume_set' | 'best_1rm_set';
+
+export interface RawPersonalRecordRow {
+  readonly pr_type: PrType;
+  readonly id: string;
+  readonly workout_entry_id: string;
+  readonly reps: number;
+  readonly original_weight: Prisma.Decimal | number;
+  readonly original_unit: string;
+  readonly weight_kg: Prisma.Decimal | number;
+  readonly volume_kg: Prisma.Decimal | number;
+  readonly estimated_1rm_kg: Prisma.Decimal | number;
+  readonly performed_at: Date;
+}

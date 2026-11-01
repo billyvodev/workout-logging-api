@@ -187,7 +187,7 @@ sequenceDiagram
 
 ### Phase 3: Data Access Layer & Parameterized SQL CTE (`src/modules/workouts/repositories/`)
 
-- [ ] **3.1 Repository Interfaces (`src/modules/workouts/repositories/interfaces/workout-repository.interface.ts`):**
+- [x] **3.1 Repository Interfaces (`src/modules/workouts/repositories/interfaces/workout-repository.interface.ts`):**
   - Define `RawPersonalRecordRow`:
     ```typescript
     export type PrType = 'heaviest_set' | 'highest_volume_set' | 'best_1rm_set';
@@ -205,7 +205,7 @@ sequenceDiagram
       readonly performed_at: Date;
     }
     ```
-- [ ] **3.2 Implement Parameterized PR CTE Query (`src/modules/workouts/repositories/workout.repository.ts`):**
+- [x] **3.2 Implement Parameterized PR CTE Query (`src/modules/workouts/repositories/workout.repository.ts`):**
   - Implement `findPersonalRecords(userId: string, exerciseNames: string[], fromDate?: Date, toDate?: Date): Promise<RawPersonalRecordRow[]>`:
     - Execute parameterized SQL query via `this.prisma.$queryRaw<RawPersonalRecordRow[]>`:
       ```sql

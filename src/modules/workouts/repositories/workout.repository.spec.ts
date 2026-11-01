@@ -2,7 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Prisma } from '@prisma/client';
 import { WorkoutRepository } from './workout.repository';
 import { PrismaService } from '../../prisma';
-import { PreparedWorkoutEntry } from './interfaces/workout-repository.interface';
+import {
+  PreparedWorkoutEntry,
+  RawPersonalRecordRow,
+} from './interfaces/workout-repository.interface';
 
 describe('WorkoutRepository', () => {
   let repository: WorkoutRepository;
@@ -13,6 +16,10 @@ describe('WorkoutRepository', () => {
       create: jest.Mock;
     };
     $transaction: jest.Mock;
+    $queryRaw: jest.Mock<
+      Promise<unknown>,
+      [TemplateStringsArray, ...unknown[]]
+    >;
   };
 
   const samplePreparedEntry: PreparedWorkoutEntry = {
@@ -46,6 +53,10 @@ describe('WorkoutRepository', () => {
         .mockImplementation((callback: (tx: unknown) => Promise<unknown>) =>
           callback(prismaMock),
         ),
+      $queryRaw: jest.fn<
+        Promise<unknown>,
+        [TemplateStringsArray, ...unknown[]]
+      >(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -483,6 +494,190 @@ describe('WorkoutRepository', () => {
           },
         },
       });
+    });
+  });
+
+  describe('findPersonalRecords', () => {
+    const mockRows: RawPersonalRecordRow[] = [
+      {
+        pr_type: 'heaviest_set',
+        id: 'set-uuid-1',
+        workout_entry_id: 'entry-uuid-1',
+        reps: 5,
+        original_weight: new Prisma.Decimal(100),
+        original_unit: 'kg',
+        weight_kg: new Prisma.Decimal(100),
+        volume_kg: new Prisma.Decimal(500),
+        estimated_1rm_kg: new Prisma.Decimal(116.67),
+        performed_at: new Date('2026-10-20T10:00:00.000Z'),
+      },
+      {
+        pr_type: 'highest_volume_set',
+        id: 'set-uuid-2',
+        workout_entry_id: 'entry-uuid-2',
+        reps: 12,
+        original_weight: new Prisma.Decimal(80),
+        original_unit: 'kg',
+        weight_kg: new Prisma.Decimal(80),
+        volume_kg: new Prisma.Decimal(960),
+        estimated_1rm_kg: new Prisma.Decimal(112),
+        performed_at: new Date('2026-10-18T14:30:00.000Z'),
+      },
+      {
+        pr_type: 'best_1rm_set',
+        id: 'set-uuid-3',
+        workout_entry_id: 'entry-uuid-3',
+        reps: 1,
+        original_weight: new Prisma.Decimal(120),
+        original_unit: 'kg',
+        weight_kg: new Prisma.Decimal(120),
+        volume_kg: new Prisma.Decimal(120),
+        estimated_1rm_kg: new Prisma.Decimal(120),
+        performed_at: new Date('2026-10-25T09:00:00.000Z'),
+      },
+    ];
+
+    it('should return empty array immediately when exerciseNames is empty', async () => {
+      const result = await repository.findPersonalRecords('user_123', []);
+
+      expect(result).toEqual([]);
+      expect(prismaMock.$queryRaw).not.toHaveBeenCalled();
+    });
+
+    it('should return empty array immediately when exerciseNames is undefined or null', async () => {
+      const result = await repository.findPersonalRecords(
+        'user_123',
+        undefined as unknown as string[],
+      );
+
+      expect(result).toEqual([]);
+      expect(prismaMock.$queryRaw).not.toHaveBeenCalled();
+    });
+
+    it('should execute parameterized CTE query for All-Time PRs when dates are omitted', async () => {
+      prismaMock.$queryRaw.mockResolvedValue(mockRows);
+
+      const result = await repository.findPersonalRecords('user_123', [
+        'bench press',
+        'barbell bench press',
+      ]);
+
+      expect(prismaMock.$queryRaw).toHaveBeenCalledTimes(1);
+      const [templateStrings, ...values] = prismaMock.$queryRaw.mock
+        .calls[0] as [readonly string[], ...unknown[]];
+
+      const fullQuery = templateStrings.join('?');
+      expect(fullQuery).toContain('WITH scoped_sets AS');
+      expect(fullQuery).toContain('WHERE user_id =');
+      expect(fullQuery).toContain('AND exercise_name_norm = ANY(');
+      expect(fullQuery).toContain('heaviest_set');
+      expect(fullQuery).toContain('highest_volume_set');
+      expect(fullQuery).toContain('best_1rm_set');
+      expect(fullQuery).toContain(
+        'ORDER BY weight_kg DESC, reps DESC, performed_at DESC, id DESC',
+      );
+      expect(fullQuery).toContain(
+        'ORDER BY volume_kg DESC, weight_kg DESC, performed_at DESC, id DESC',
+      );
+      expect(fullQuery).toContain(
+        'ORDER BY estimated_1rm_kg DESC, weight_kg DESC, performed_at DESC, id DESC',
+      );
+
+      expect(values).toEqual([
+        'user_123',
+        ['bench press', 'barbell bench press'],
+        null,
+        null,
+        null,
+        null,
+      ]);
+
+      expect(result).toEqual(mockRows);
+    });
+
+    it('should pass ISO string date bounds when fromDate and toDate are provided', async () => {
+      prismaMock.$queryRaw.mockResolvedValue(mockRows);
+
+      const fromDate = new Date('2026-10-01T00:00:00.000Z');
+      const toDate = new Date('2026-10-31T23:59:59.999Z');
+
+      const result = await repository.findPersonalRecords(
+        'user_123',
+        ['squat'],
+        fromDate,
+        toDate,
+      );
+
+      expect(prismaMock.$queryRaw).toHaveBeenCalledTimes(1);
+      const [, ...values] = prismaMock.$queryRaw.mock.calls[0] as [
+        unknown,
+        ...unknown[],
+      ];
+
+      expect(values).toEqual([
+        'user_123',
+        ['squat'],
+        '2026-10-01T00:00:00.000Z',
+        '2026-10-01T00:00:00.000Z',
+        '2026-10-31T23:59:59.999Z',
+        '2026-10-31T23:59:59.999Z',
+      ]);
+
+      expect(result).toEqual(mockRows);
+    });
+
+    it('should correctly handle when only fromDate is provided', async () => {
+      prismaMock.$queryRaw.mockResolvedValue(mockRows);
+
+      const fromDate = new Date('2026-10-01T00:00:00.000Z');
+
+      await repository.findPersonalRecords(
+        'user_123',
+        ['deadlift'],
+        fromDate,
+        undefined,
+      );
+
+      const [, ...values] = prismaMock.$queryRaw.mock.calls[0] as [
+        unknown,
+        ...unknown[],
+      ];
+
+      expect(values).toEqual([
+        'user_123',
+        ['deadlift'],
+        '2026-10-01T00:00:00.000Z',
+        '2026-10-01T00:00:00.000Z',
+        null,
+        null,
+      ]);
+    });
+
+    it('should correctly handle when only toDate is provided', async () => {
+      prismaMock.$queryRaw.mockResolvedValue(mockRows);
+
+      const toDate = new Date('2026-10-31T23:59:59.999Z');
+
+      await repository.findPersonalRecords(
+        'user_123',
+        ['deadlift'],
+        undefined,
+        toDate,
+      );
+
+      const [, ...values] = prismaMock.$queryRaw.mock.calls[0] as [
+        unknown,
+        ...unknown[],
+      ];
+
+      expect(values).toEqual([
+        'user_123',
+        ['deadlift'],
+        null,
+        null,
+        '2026-10-31T23:59:59.999Z',
+        '2026-10-31T23:59:59.999Z',
+      ]);
     });
   });
 });
