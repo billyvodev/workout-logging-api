@@ -7,9 +7,9 @@ The goal is to implement the **Get Workout History** endpoint:
 - **Route:** `GET /api/v1/users/:userId/workouts`
 - **Status Code:** `200 OK`
 - **Key Responsibilities:**
-  1. Validate and sanitize query parameters (`exerciseName`, `from`, `to`, `muscleGroup`, `unit`, `limit`, `cursor`, `page`).
+  1. Validate and sanitize query parameters (`exerciseName`, `from`, `to`, `muscleGroup`, `unit`, `limit`, `cursor`).
   2. Enforce date constraints: validate ISO 8601 formatting, normalize date-only boundaries (`YYYY-MM-DD` expands to `00:00:00.000Z` and `23:59:59.999Z`), and verify `from <= to` (throwing `400 VALIDATION_ERROR` on inverted ranges).
-  3. Support high-performance keyset pagination ($O(\log N)$) via composite B-Tree index `(user_id, performed_at DESC, id DESC)` using Base64-encoded cursor tokens (`performed_at + id`), with fallback support for standard `page`/`limit` offset pagination.
+  3. Support high-performance keyset cursor pagination ($O(\log N)$) via composite B-Tree index `(user_id, performed_at DESC, id DESC)` using Base64-encoded cursor tokens (`performed_at + id`).
   4. Leverage PostgreSQL GIN `pg_trgm` index on `exercise_name_norm` for fast case-insensitive partial substring matching (`exerciseName`).
   5. Perform dynamic unit conversion and zero-drift return (if requested unit matches the set's `original_unit`, preserve the exact `original_weight` without floating-point conversion artifacts).
   6. Compute display volume (`reps * weight`) and Epley estimated 1RM (`weight * (1 + reps / 30)`) in requested unit, rounded to 2 decimal places.
@@ -101,7 +101,7 @@ sequenceDiagram
 
 ### Phase 2: DTOs & Strict Validation (`src/modules/workouts/dto/`)
 
-- [ ] **2.1 Workout History Query DTO (`src/modules/workouts/dto/workout-history-query.dto.ts`):**
+- [x] **2.1 Workout History Query DTO (`src/modules/workouts/dto/workout-history-query.dto.ts`):**
   - `exerciseName?: string`: Optional trimmed string for case-insensitive partial match (`ILIKE` / `pg_trgm`).
   - `from?: string`: Optional ISO 8601 string. Normalizes date-only string (`YYYY-MM-DD`) to `00:00:00.000Z`.
   - `to?: string`: Optional ISO 8601 string. Normalizes date-only string (`YYYY-MM-DD`) to `23:59:59.999Z`.
@@ -109,9 +109,8 @@ sequenceDiagram
   - `muscleGroup?: string`: Optional trimmed string for case-insensitive exact match.
   - `unit?: string`: Optional string, decorated with `@IsSupportedUnit()` (defaults to `'kg'`).
   - `limit?: number`: Optional integer, `@Type(() => Number) @IsInt() @Min(1) @Max(100)` (defaults to `20`).
-  - `cursor?: string`: Optional Base64 cursor string.
-  - `page?: number`: Optional integer, `@Type(() => Number) @IsInt() @Min(1)`.
-- [ ] **2.2 Workout History Response DTOs (`src/modules/workouts/dto/workout-history-response.dto.ts`):**
+  - `cursor?: string`: Optional Base64 cursor string for keyset pagination.
+- [x] **2.2 Workout History Response DTOs (`src/modules/workouts/dto/workout-history-response.dto.ts`):**
   - `WorkoutHistorySetDto`:
     - `setNumber`: number
     - `reps`: number
@@ -139,7 +138,7 @@ sequenceDiagram
     - `data`: `WorkoutHistoryEntryDto[]`
     - `pagination`: `WorkoutHistoryPaginationDto`
     - `meta`: `WorkoutHistoryMetaDto`
-- [ ] **2.3 Export DTOs (`src/modules/workouts/dto/index.ts`):**
+- [x] **2.3 Export DTOs (`src/modules/workouts/dto/index.ts`):**
   - Export new query and response DTOs.
 
 ---
@@ -156,7 +155,6 @@ sequenceDiagram
       readonly muscleGroup?: string;
       readonly limit: number;
       readonly cursor?: { readonly performedAt: Date; readonly id: string };
-      readonly page?: number;
     }
     ```
 - [ ] **3.2 Keyset Query Implementation (`src/modules/workouts/repositories/workout.repository.ts`):**
@@ -175,7 +173,6 @@ sequenceDiagram
         ```
     - Apply keyset ordering: `orderBy: [ { performedAt: 'desc' }, { id: 'desc' } ]`.
     - Apply pagination limits: `take: limit + 1`.
-    - If `cursor` is omitted and `page` is provided: `skip = (page - 1) * limit`.
     - Eager load ordered sets: `include: { sets: { orderBy: { setNumber: 'asc' } } }`.
 
 ---
@@ -251,7 +248,6 @@ sequenceDiagram
   - `cursor.util.spec.ts`: Test valid encode/decode round-trip, invalid Base64, missing fields, and bad timestamps.
   - `workout-history.service.spec.ts`:
     - Test keyset pagination (`hasNextPage = true/false`, `nextCursor` generation).
-    - Test offset pagination fallback when `page` is provided.
     - Test zero-drift preservation vs. cross-unit conversion (`kg` $\leftrightarrow$ `lb`).
     - Test set volume and Epley 1RM calculation in target unit.
     - Test date normalization and inverted range rejection.

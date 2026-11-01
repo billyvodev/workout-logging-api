@@ -221,20 +221,19 @@ Exercise metadata is externalized into `config/exercise-mappings.json` (and sync
 2. **Preparation:** Resolves `muscle_group` via `ExerciseMetadataService` and computes `weight_kg`, `volume_kg`, and `estimated_1rm_kg` for each set via `UnitConversionService` and `PrCalculatorUtil`.
 3. **Atomic Transaction:** Executes a single PostgreSQL transaction inserting all `workout_entries` and batch-inserting all `workout_sets`. If any entry fails, the entire batch rolls back cleanly.
 
-### 6.2 Workout History with Cursor & Offset Pagination
+### 6.2 Workout History with Keyset (Cursor) Pagination
 
 `GET /api/v1/users/:userId/workouts` supports filtering by `exerciseName` (partial match), `from`/`to` dates, `muscleGroup`, and target `unit`.
 
-- **Dual Pagination Support:**
-  - **Cursor Pagination (Recommended for scale):** Uses base64-encoded `(performed_at, id)` keyset cursor:
+- **Pure Keyset (Cursor) Pagination:**
+  - Uses base64-encoded `(performed_at, id)` keyset cursor:
     ```sql
     WHERE user_id = $1
       AND (performed_at, id) < ($cursorDate, $cursorId)
     ORDER BY performed_at DESC, id DESC
     LIMIT $limit + 1
     ```
-    This guarantees constant $O(\log N)$ latency even when paging to the 50,000th workout entry.
-  - **Offset Pagination:** Also supported via `page` and `limit` query parameters for standard table UIs.
+  - Strictly relies on cursor-based traversal to guarantee constant $O(\log N)$ latency even when paging to the 50,000th workout entry, completely eliminating SQL `OFFSET` performance degradation and phantom/missing row anomalies.
 
 ### 6.3 Personal Records (PRs) & Time-Range Comparison
 

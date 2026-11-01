@@ -217,7 +217,6 @@ Retrieves a paginated list of workout entries for a user, ordered chronologicall
 | `unit` | `string` | No | `kg` | Target unit for returned weights (`kg`, `lb`). If omitted, values are returned in `kg` alongside original metadata. | 
 | `limit` | `integer` | No | `20` | Number of entries per page (`min: 1`, `max: 100`). | 
 | `cursor` | `string` | No | — | Opaque Base64-encoded cursor (`performed_at + id`) from previous response for $O(\log N)$ keyset pagination. | 
-| `page` | `integer` | No | — | Optional 1-based page number if client prefers offset pagination (`offset = (page - 1) * limit`). Ignored if `cursor` is provided. | 
 
 #### Success Response (`200 OK`)
 
