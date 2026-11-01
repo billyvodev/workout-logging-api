@@ -77,7 +77,7 @@ sequenceDiagram
 
 ### Phase 1: Keyset Cursor Utility & Validation (`src/common/utils/`)
 
-- [ ] **1.1 Cursor Utility (`src/common/utils/cursor.util.ts`):**
+- [x] **1.1 Cursor Utility (`src/common/utils/cursor.util.ts`):**
   - Define cursor interface:
     ```typescript
     export interface CursorPayload {
@@ -91,9 +91,9 @@ sequenceDiagram
     - Decode Base64 string safely.
     - Parse JSON and validate presence and formats of `performedAt` (valid date timestamp) and `id` (non-empty string/UUID).
     - Throw `InvalidCursorException` on invalid Base64, JSON parse error, missing fields, or invalid date (`code: INVALID_CURSOR`).
-- [ ] **1.2 Common Utils Export (`src/common/utils/index.ts`):**
+- [x] **1.2 Common Utils Export (`src/common/utils/index.ts`):**
   - Export cursor utility functions for consumption across modules.
-- [ ] **1.3 Cursor Unit Tests (`src/common/utils/cursor.util.spec.ts`):**
+- [x] **1.3 Cursor Unit Tests (`src/common/utils/cursor.util.spec.ts`):**
   - Test valid round-trip encode/decode.
   - Test malformed Base64, tampered JSON, missing keys, and invalid timestamp parsing.
 
