@@ -300,7 +300,7 @@ sequenceDiagram
 
 ### Phase 5: HTTP Controller & Route Registration (`src/modules/workouts/controllers/`)
 
-- [ ] **5.1 Personal Records Controller (`src/modules/workouts/controllers/personal-records.controller.ts`):**
+- [x] **5.1 Personal Records Controller (`src/modules/workouts/controllers/personal-records.controller.ts`):**
   - Create dedicated controller `@Controller('users/:userId/personal-records')` matching NestJS modular separation:
     ```typescript
     @ApiTags('Personal Records')
@@ -320,7 +320,7 @@ sequenceDiagram
     }
     ```
   - Structured logging with Pino: log `userId`, `exerciseName`, `hasComparison`, and `durationMs`.
-- [ ] **5.2 Controller Registration (`src/modules/workouts/controllers/index.ts` & `workouts.module.ts`):**
+- [x] **5.2 Controller Registration (`src/modules/workouts/controllers/index.ts` & `workouts.module.ts`):**
   - Export `PersonalRecordsController` and register in `WorkoutsModule` controllers array.
 
 ---
