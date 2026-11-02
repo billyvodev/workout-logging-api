@@ -1,8 +1,8 @@
-# Performance & Benchmark Testing Plan: Everfit Workout Logging API
+# Performance & Benchmark Testing Plan: Workout Logging API
 
 ## 1. Executive Summary & Benchmark Objectives
 
-The **Everfit Workout Logging API** is architected to deliver sub-50ms query execution even when a single user scales past **50,000+ workout entries** (~200,000+ individual sets). 
+The **Workout Logging API** is architected to deliver sub-50ms query execution even when a single user scales past **50,000+ workout entries** (~200,000+ individual sets). 
 
 This plan defines the strategy, test harness, scenarios, datasets, and acceptance criteria required to comprehensively benchmark and stress-test all API endpoints in compliance with [`docs/architecture.md`](../architecture.md) and [`docs/api_endpoints_specification.md`](../api_endpoints_specification.md).
 
@@ -228,7 +228,7 @@ flowchart TD
 - Provide cross-platform runners (`run-all-benchmarks.sh`, `run-all-benchmarks.ps1`) and SLA markdown report generator (`report-generator.ts`).
 
 ### Phase 4: Benchmark Execution (Completed)
-- Start containerized services: PostgreSQL 17 running via Docker (`everfit_postgres`).
+- Start containerized services: PostgreSQL 17 running via Docker (`workout_postgres`).
 - Pre-seeded 60,000 workout entries and 240,066 workout sets across 1 power user and 100 tenant users.
 - Executed k6 benchmark suites across all endpoints (`scenarios 01 to 05`).
 - Validated system under load: 0.00% error rate across all runs, zero connection pool timeouts, and overall mixed production workload achieved p95 of 32.58ms (< 50ms SLA).

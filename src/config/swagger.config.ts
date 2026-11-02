@@ -7,21 +7,17 @@ import {
 } from '@nestjs/swagger';
 
 /**
- * Builds the OpenAPI 3.0 document specification for the Everfit Workout Logging API.
+ * Builds the OpenAPI 3.0 document specification for the Workout Logging API.
  */
 export function createSwaggerDocument(app: INestApplication): OpenAPIObject {
   const config = new DocumentBuilder()
-    .setTitle('Everfit Workout Logging API')
+    .setTitle('Workout Logging API')
     .setDescription(
       `## Overview
 High-performance REST API backend service for fitness coaches and clients to log workout sets, inspect workout history using keyset cursor pagination, and analyze Personal Records (PRs) across arbitrary time windows.`,
     )
     .setVersion('1.0.0')
-    .setContact(
-      'Everfit Engineering Team',
-      'https://everfit.io',
-      'support@everfit.io',
-    )
+    .setContact('Engineering Team', 'https://github.com', 'support@example.com')
     .setLicense('MIT', 'https://opensource.org/licenses/MIT')
     .addTag(
       'App',
@@ -63,7 +59,7 @@ High-performance REST API backend service for fitness coaches and clients to log
 }
 
 export const swaggerCustomOptions: SwaggerCustomOptions = {
-  customSiteTitle: 'Everfit Workout Logging API Documentation',
+  customSiteTitle: 'Workout Logging API Documentation',
   swaggerOptions: {
     persistAuthorization: true,
     displayRequestDuration: true,

@@ -1,4 +1,4 @@
-# Everfit Workout Logging API
+# Workout Logging API
 
 > A high-performance, production-ready backend service built with **NestJS**, **TypeScript**, and **PostgreSQL 17** (via **Prisma ORM**). Designed for fitness coaches and athletes to log single or bulk workout sessions, query historical performance via keyset cursor pagination, and compute Personal Records (PRs) across arbitrary time periods with period-over-period comparisons.
 

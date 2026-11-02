@@ -9,6 +9,6 @@ export default defineConfig({
   datasource: {
     url:
       process.env.DATABASE_URL ||
-      'postgresql://postgres:postgres@localhost:5432/everfit_workout',
+      'postgresql://postgres:postgres@localhost:5432/workout_db',
   },
 });

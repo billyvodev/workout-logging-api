@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Master Performance Benchmark Runner
-# Everfit Workout Logging API
+# Workout Logging API
 # ==============================================================================
 set -e
 
@@ -33,7 +33,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo "======================================================================"
-echo " Everfit Workout Logging API — Benchmark Test Suite Execution"
+echo " Workout Logging API — Benchmark Test Suite Execution"
 echo " Target Base URL : ${BASE_URL}"
 echo " Target User ID  : ${USER_ID}"
 if [ "$QUICK_MODE" = true ]; then

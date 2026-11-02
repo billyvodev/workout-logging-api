@@ -184,7 +184,7 @@ async function prepareTestContext(
 async function runPlanVerification(): Promise<void> {
   const connectionString =
     process.env.DATABASE_URL ??
-    'postgresql://postgres:postgres@127.0.0.1:5432/everfit_workout?schema=public';
+    'postgresql://postgres:postgres@127.0.0.1:5432/workout_db?schema=public';
 
   const adapter = new PrismaPg({ connectionString });
   const prisma = new PrismaClient({ adapter });
@@ -193,7 +193,7 @@ async function runPlanVerification(): Promise<void> {
     '================================================================================',
   );
   console.log(
-    'EVERFIT WORKOUT API — DATABASE INDEX & EXECUTION PLAN PROFILING (PHASE 2)',
+    'WORKOUT LOGGING API — DATABASE INDEX & EXECUTION PLAN PROFILING (PHASE 2)',
   );
   console.log(
     '================================================================================',

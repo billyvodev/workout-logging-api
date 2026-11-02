@@ -13,7 +13,7 @@ $env:USER_ID = $UserId
 $ResultsDir = "test/benchmark/results"
 
 Write-Host "======================================================================" -ForegroundColor Cyan
-Write-Host " Everfit Workout Logging API - Benchmark Test Suite Execution" -ForegroundColor Cyan
+Write-Host " Workout Logging API - Benchmark Test Suite Execution" -ForegroundColor Cyan
 Write-Host " Target Base URL : $BaseUrl" -ForegroundColor Cyan
 Write-Host " Target User ID  : $UserId" -ForegroundColor Cyan
 if ($Quick) {

@@ -10,7 +10,7 @@ export class PrismaService
   constructor() {
     const connectionString =
       process.env.DATABASE_URL ??
-      'postgresql://postgres:postgres@127.0.0.1:5432/everfit_workout?schema=public';
+      'postgresql://postgres:postgres@127.0.0.1:5432/workout_db?schema=public';
     const adapter = new PrismaPg({ connectionString });
     super({ adapter });
   }

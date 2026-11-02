@@ -363,7 +363,7 @@ export function generateBenchmarkReport(): void {
 
   // Generate Markdown table
   const timestamp = new Date().toISOString();
-  let markdown = `# Benchmark Performance Report: Everfit Workout Logging API\n\n`;
+  let markdown = `# Benchmark Performance Report: Workout Logging API\n\n`;
   markdown += `**Generated At:** ${timestamp}\n`;
   markdown += `**Target Scale Target:** 50,000+ Entries (~200,000 sets) on \`benchmark_power_user\`\n\n`;
   markdown += `### Performance SLA Verification Table\n\n`;

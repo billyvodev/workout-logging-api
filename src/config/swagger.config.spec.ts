@@ -37,12 +37,12 @@ describe('SwaggerConfig', () => {
       const document = createSwaggerDocument(app);
 
       expect(document.openapi).toBe('3.0.0');
-      expect(document.info.title).toBe('Everfit Workout Logging API');
+      expect(document.info.title).toBe('Workout Logging API');
       expect(document.info.version).toBe('1.0.0');
       expect(document.info.description).toContain(
         'High-performance REST API backend service for fitness coaches and clients',
       );
-      expect(document.info.contact?.name).toBe('Everfit Engineering Team');
+      expect(document.info.contact?.name).toBe('Engineering Team');
       expect(document.info.license?.name).toBe('MIT');
 
       const tagNames = document.tags?.map((t) => t.name);
@@ -82,7 +82,7 @@ describe('SwaggerConfig', () => {
       const document = setupSwagger(app);
 
       expect(document).toBeDefined();
-      expect(document.info.title).toBe('Everfit Workout Logging API');
+      expect(document.info.title).toBe('Workout Logging API');
       expect(setupSpy).toHaveBeenCalledWith(
         'docs',
         app,

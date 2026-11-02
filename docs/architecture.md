@@ -1,8 +1,8 @@
-# Everfit Workout Logging API — System Architecture
+# Workout Logging API — System Architecture
 
 ## 1. Executive Summary & Architectural Goals
 
-This document outlines the architecture for the **Everfit Workout Logging API**, a backend service enabling fitness coaches and clients to log workouts, filter historical performance, and track Personal Records (PRs) across time ranges.
+This document outlines the architecture for the **Workout Logging API**, a backend service enabling fitness coaches and clients to log workouts, filter historical performance, and track Personal Records (PRs) across time ranges.
 
 The system is designed around six core engineering pillars:
 

@@ -34,9 +34,7 @@ describe('Swagger Documentation (e2e)', () => {
       .get('/docs/')
       .expect(200);
 
-    expect(response.text).toContain(
-      'Everfit Workout Logging API Documentation',
-    );
+    expect(response.text).toContain('Workout Logging API Documentation');
     expect(response.text).toContain('id="swagger-ui"');
   });
 
@@ -45,9 +43,7 @@ describe('Swagger Documentation (e2e)', () => {
       .get('/api/docs/')
       .expect(200);
 
-    expect(response.text).toContain(
-      'Everfit Workout Logging API Documentation',
-    );
+    expect(response.text).toContain('Workout Logging API Documentation');
     expect(response.text).toContain('id="swagger-ui"');
   });
 
@@ -56,9 +52,7 @@ describe('Swagger Documentation (e2e)', () => {
       .get('/api/v1/docs/')
       .expect(200);
 
-    expect(response.text).toContain(
-      'Everfit Workout Logging API Documentation',
-    );
+    expect(response.text).toContain('Workout Logging API Documentation');
     expect(response.text).toContain('id="swagger-ui"');
   });
 
@@ -72,7 +66,7 @@ describe('Swagger Documentation (e2e)', () => {
     const spec = response.body as unknown as OpenAPIObject;
     expect(spec.openapi).toBe('3.0.0');
     expect(spec.info).toBeDefined();
-    expect(spec.info.title).toBe('Everfit Workout Logging API');
+    expect(spec.info.title).toBe('Workout Logging API');
     expect(spec.info.version).toBe('1.0.0');
     expect(spec.paths).toBeDefined();
     expect(spec.paths['/api/v1']).toBeDefined();

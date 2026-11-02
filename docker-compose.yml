@@ -1,19 +1,19 @@
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: everfit_postgres
+    container_name: workout_postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-everfit_workout}
+      POSTGRES_DB: ${POSTGRES_DB:-workout_db}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     command: postgres -c shared_buffers=256MB -c work_mem=16MB -c max_connections=150
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-everfit_workout}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-workout_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: everfit_api
+    container_name: workout_api
     restart: unless-stopped
     depends_on:
       postgres:
@@ -30,7 +30,7 @@ services:
     environment:
       PORT: 3000
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-everfit_workout}?schema=public&connection_limit=30&pool_timeout=15
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-workout_db}?schema=public&connection_limit=30&pool_timeout=15
     ports:
       - "3000:3000"
 

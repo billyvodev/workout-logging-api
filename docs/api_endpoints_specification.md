@@ -1,4 +1,4 @@
-# Everfit Workout Logging API — Endpoint Requirements Specification
+# Workout Logging API — Endpoint Requirements Specification
 
 ## 1. Overview & Global Conventions
 
