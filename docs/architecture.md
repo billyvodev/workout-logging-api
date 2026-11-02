@@ -239,9 +239,9 @@ Exercise metadata is externalized into `config/exercise-mappings.json` (and sync
 
 `GET /api/v1/users/:userId/personal-records` calculates three distinct PRs for a given `userId` and `exerciseName`:
 
-1. **Heaviest Single Set** ($\max(\text{weight\_kg})$)
-2. **Highest Volume Set** ($\max(\text{volume\_kg})$)
-3. **Best Estimated 1RM** ($\max(\text{estimated\_1rm\_kg})$)
+1. **Heaviest Single Set** (`max(weight_kg)`)
+2. **Highest Volume Set** (`max(volume_kg)`)
+3. **Best Estimated 1RM** (`max(estimated_1rm_kg)`)
 
 **Single-Pass SQL Query with Deterministic Tie-Breaking:**
 Because each PR may have been achieved in a _different set on a different date_, a naive `GROUP BY` cannot accurately retrieve the corresponding `performed_at` timestamp and `reps` for each record. We use a parameterized CTE with `UNION ALL`:

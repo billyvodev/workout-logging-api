@@ -419,7 +419,7 @@ To guarantee sub-50ms execution times when a single user scales past **50,000+ e
 1. **Write-Time Denormalization:**  
    `user_id`, `exercise_name_norm`, and `performed_at` are denormalized from `workout_entries` into `workout_sets`. This eliminates relational table joins on analytical PR queries.
 2. **Pre-computed Analytical Columns:**  
-   Every set calculates `weight_kg`, $\text{volume\_kg} = \text{reps} \times \text{weight\_kg}$, and $\text{estimated\_1rm\_kg} = \text{weight\_kg} \times (1 + \text{reps} / 30)$ at insert time.
+   Every set calculates `weight_kg`, `volume_kg` (`reps * weight_kg`), and `estimated_1rm_kg` (`weight_kg * (1 + reps / 30)`) at insert time.
 3. **Composite B-Tree & GIN Trigram Indexes:**
    - **`idx_sets_pr_lookup`** on `workout_sets (user_id, exercise_name_norm, performed_at DESC)`: Powers single-table index scans for PR CTE queries.
    - **`idx_entries_user_performed_id`** on `workout_entries (user_id, performed_at DESC, id DESC)`: Powers deterministic $O(\log N)$ keyset cursor pagination.
