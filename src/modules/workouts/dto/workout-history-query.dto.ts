@@ -133,8 +133,7 @@ export class WorkoutHistoryQueryDto {
   @ApiPropertyOptional({
     description:
       'Opaque Base64-encoded cursor token (performed_at + id) from previous response for keyset pagination',
-    example:
-      'eyJwZXJmb3JtZWRBdCI6IjIwMjYtMTAtMjlUMTA6MzA6MDAuMDAwWiIsImlkIjoiZW50cnlfMDFqY2JlOTl6OHgifQ==',
+    example: '',
   })
   @IsOptional()
   @IsString({ message: 'cursor must be a string' })
